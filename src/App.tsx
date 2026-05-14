@@ -900,34 +900,109 @@ function PricingSection({ scrollTo }: { scrollTo: (id: string) => void }) {
 /* ═══════════════════════════════════════════════════════════════
    CONTACT SECTION
    ═══════════════════════════════════════════════════════════════ */
+/* ── Service → Package mapping ── */
+const SERVICE_OPTIONS = [
+  { id: "brand",   code: "S-01", label: "Brand Identity Design" },
+  { id: "web",     code: "S-02", label: "Web Development" },
+  { id: "store",   code: "S-03", label: "D2C Store Development" },
+  { id: "ai",      code: "S-04", label: "AI Content Creation" },
+  { id: "video",   code: "S-05", label: "Video & Reels" },
+  { id: "growth",  code: "S-06", label: "Growth Marketing" },
+] as const;
+
+type ServiceId = typeof SERVICE_OPTIONS[number]["id"];
+
+const PACKAGE_TIERS = [
+  { id: "STARTER",     label: "STARTER — ₹24,999",     price: "₹24,999" },
+  { id: "GROWTH",      label: "GROWTH — ₹49,999",      price: "₹49,999" },
+  { id: "DOMINATION",  label: "DOMINATION — ₹74,999",  price: "₹74,999" },
+] as const;
+
+type PackageId = typeof PACKAGE_TIERS[number]["id"] | "";
+
+function derivePackage(selected: ServiceId[]): PackageId {
+  const count = selected.length;
+  if (count === 0) return "";
+  const hasStore  = selected.includes("store");
+  const hasVideo  = selected.includes("video");
+  const hasGrowth = selected.includes("growth");
+  if (count >= 5 || (hasStore && hasVideo && hasGrowth)) return "DOMINATION";
+  if (count >= 3) return "GROWTH";
+  return "STARTER";
+}
+
 interface ContactForm {
-  name: string; email: string; projectType: string; message: string;
+  name: string; email: string; services: ServiceId[]; selectedPackage: PackageId; message: string;
 }
 
 function ContactSection({ scrollTo }: { scrollTo: (id: string) => void }) {
-  const [form, setForm] = useState<ContactForm>({ name: "", email: "", projectType: "Web Development", message: "" });
+  const [form, setForm] = useState<ContactForm>({ name: "", email: "", services: [], selectedPackage: "", message: "" });
   const [submitted, setSubmitted] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     setForm(prev => ({ ...prev, [e.target.name]: e.target.value }));
+  };
+
+  const toggleService = (id: ServiceId) => {
+    setForm(prev => {
+      const next = prev.services.includes(id)
+        ? prev.services.filter(s => s !== id)
+        : [...prev.services, id];
+      return { ...prev, services: next, selectedPackage: derivePackage(next) };
+    });
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setSubmitting(true);
+    setSubmitError(null);
+    const serviceLabels = form.services.map(id => SERVICE_OPTIONS.find(s => s.id === id)?.label ?? id);
+    const projectType   = serviceLabels.join(", ") || "General Inquiry";
+    const packageLabel  = form.selectedPackage
+      ? PACKAGE_TIERS.find(p => p.id === form.selectedPackage)?.label ?? form.selectedPackage
+      : "Not specified";
+
     try {
-      await supabase.from('contact_inquiries').insert({
-        name: form.name,
-        email: form.email,
-        project_type: form.projectType,
-        message: form.message,
+      /* 1 — persist to Supabase */
+      const { error: dbErr } = await supabase.from('contact_inquiries').insert({
+        name:             form.name,
+        email:            form.email,
+        project_type:     projectType,
+        selected_package: form.selectedPackage || null,
+        message:          form.message,
       });
-    } catch (err) { console.error('[AXY] Supabase insert error:', err); }
-    const subject = encodeURIComponent(`[AX-INTAKE] ${form.projectType} — ${form.name}`);
-    const body = encodeURIComponent(
-      `INTAKE REQUEST\n\nName: ${form.name}\nEmail: ${form.email}\nProject Type: ${form.projectType}\n\nMessage:\n${form.message}\n\n---\nSent via ProjectsByAxy Contact System`
-    );
-    window.open(`mailto:mail@projectsbyaxy.com?subject=${subject}&body=${body}`, "_blank");
-    setSubmitted(true);
+      if (dbErr) console.error('[AXY] Supabase insert error:', dbErr);
+
+      /* 2 — fire edge function directly (handles admin + confirmation emails) */
+      const supabaseUrl = import.meta.env.VITE_SUPABASE_URL as string;
+      const supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY as string;
+      await fetch(`${supabaseUrl}/functions/v1/notify-new-inquiry`, {
+        method: "POST",
+        headers: {
+          "Content-Type":  "application/json",
+          "Authorization": `Bearer ${supabaseKey}`,
+        },
+        body: JSON.stringify({
+          record: {
+            name:             form.name,
+            email:            form.email,
+            project_type:     projectType,
+            selected_package: packageLabel,
+            message:          form.message,
+            created_at:       new Date().toISOString(),
+          },
+        }),
+      });
+
+      setSubmitted(true);
+    } catch (err) {
+      console.error('[AXY] Submission error:', err);
+      setSubmitError("Transmission failed. Please try again or email us directly.");
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   const inputClass = "w-full bg-white/[0.03] border border-white/10 text-white/80 font-mono text-[12px] px-4 py-3 focus:outline-none focus:border-white/40 placeholder:text-white/20 transition-colors tracking-wide";
@@ -994,26 +1069,57 @@ function ContactSection({ scrollTo }: { scrollTo: (id: string) => void }) {
                     />
                   </motion.div>
 
-                  {/* Project Type */}
+                  {/* Services Checkboxes */}
+                  <motion.div variants={itemVariants} className="flex flex-col gap-2">
+                    <label className="text-[9px] uppercase tracking-[0.3em] font-mono text-white/25">
+                      Needed Services
+                      <span className="ml-2 text-white/15 normal-case tracking-normal">— select all that apply</span>
+                    </label>
+                    <div className="grid grid-cols-2 gap-1.5">
+                      {SERVICE_OPTIONS.map(svc => {
+                        const checked = form.services.includes(svc.id);
+                        return (
+                          <button
+                            key={svc.id}
+                            type="button"
+                            onClick={() => toggleService(svc.id)}
+                            className={`flex items-center gap-2.5 px-3 py-2.5 border text-left transition-all duration-200 group ${
+                              checked
+                                ? "border-orange-400/50 bg-orange-400/5 text-white/80"
+                                : "border-white/8 bg-white/[0.02] text-white/35 hover:border-white/20 hover:text-white/55"
+                            }`}
+                          >
+                            {/* custom checkbox */}
+                            <span className={`flex-shrink-0 w-3.5 h-3.5 border flex items-center justify-center transition-all ${
+                              checked ? "border-orange-400/70 bg-orange-400/20" : "border-white/20"
+                            }`}>
+                              {checked && <Check size={8} className="text-orange-400" />}
+                            </span>
+                            <span className="text-[9px] font-mono uppercase tracking-[0.15em] leading-tight">{svc.label}</span>
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </motion.div>
+
+                  {/* Package — auto-locked, read-only display */}
                   <motion.div variants={itemVariants} className="flex flex-col gap-1.5">
                     <label className="text-[9px] uppercase tracking-[0.3em] font-mono text-white/25">
-                      Project Category *
+                      Suggested Package
+                      <span className="ml-2 text-white/15 normal-case tracking-normal">— auto-assigned from services</span>
                     </label>
-                    <select
-                      name="projectType"
-                      value={form.projectType} onChange={handleChange}
-                      className={`${inputClass} appearance-none cursor-pointer`}
-                      style={{ backgroundImage: "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='rgba(255,255,255,0.3)' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E\")", backgroundRepeat: "no-repeat", backgroundPosition: "right 14px center" }}
-                    >
-                      <option className="bg-black">Web Development</option>
-                      <option className="bg-black">Brand Identity</option>
-                      <option className="bg-black">AI Automation</option>
-                      <option className="bg-black">E-Commerce</option>
-                      <option className="bg-black">Content Production</option>
-                      <option className="bg-black">Analytics & Growth</option>
-                      <option className="bg-black">Full Package</option>
-                      <option className="bg-black">Custom / Other</option>
-                    </select>
+                    <div className={`${inputClass} flex items-center justify-between cursor-default select-none ${
+                      form.selectedPackage ? "border-orange-400/30 text-orange-400/80" : "text-white/20 italic"
+                    }`}>
+                      <span>
+                        {form.selectedPackage
+                          ? PACKAGE_TIERS.find(p => p.id === form.selectedPackage)?.label
+                          : "Select services above to auto-assign"}
+                      </span>
+                      {form.selectedPackage && (
+                        <span className="text-[9px] font-mono text-white/20 uppercase tracking-widest">Locked</span>
+                      )}
+                    </div>
                   </motion.div>
 
                   {/* Message */}
@@ -1022,25 +1128,42 @@ function ContactSection({ scrollTo }: { scrollTo: (id: string) => void }) {
                       Mission Brief *
                     </label>
                     <textarea
-                      name="message" required rows={5}
+                      name="message" required rows={4}
                       placeholder="Describe your project, goals, timeline, and any specific requirements..."
                       value={form.message} onChange={handleChange}
                       className={`${inputClass} resize-none`}
                     />
                   </motion.div>
 
+                  {/* Error */}
+                  {submitError && (
+                    <div className="text-[10px] font-mono text-red-400/70 border border-red-400/20 px-4 py-3 bg-red-400/5">
+                      ⚠ {submitError}
+                    </div>
+                  )}
+
                   {/* Submit */}
                   <motion.div variants={itemVariants}>
                     <button
                       type="submit"
-                      className="w-full py-4 bg-white text-black text-[10px] uppercase tracking-[0.4em] font-mono font-bold hover:bg-white/90 transition-all duration-300 flex items-center justify-center gap-3 group mt-2"
+                      disabled={submitting}
+                      className="w-full py-4 bg-white text-black text-[10px] uppercase tracking-[0.4em] font-mono font-bold hover:bg-white/90 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 flex items-center justify-center gap-3 group mt-2"
                     >
-                      <Send size={13} />
-                      Transmit Request
-                      <span className="group-hover:translate-x-1 transition-transform inline-block">→</span>
+                      {submitting ? (
+                        <>
+                          <span className="w-3 h-3 border border-black/40 border-t-black rounded-full animate-spin" />
+                          Transmitting...
+                        </>
+                      ) : (
+                        <>
+                          <Send size={13} />
+                          Transmit Request
+                          <span className="group-hover:translate-x-1 transition-transform inline-block">→</span>
+                        </>
+                      )}
                     </button>
                     <p className="text-[9px] font-mono text-white/20 text-center mt-3 uppercase tracking-widest">
-                      Opens your email client // Fully encrypted channel
+                      Direct transmission // No email client // Secure channel
                     </p>
                   </motion.div>
                 </motion.form>

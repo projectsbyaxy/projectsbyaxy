@@ -14,6 +14,7 @@ export interface Inquiry {
   name: string
   email: string
   project_type: string
+  selected_package: string | null
   message: string
   status: 'new' | 'read' | 'replied' | 'archived'
   notes: string | null
