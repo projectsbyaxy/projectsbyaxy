@@ -23,7 +23,7 @@ import { supabase } from './lib/supabase';
 import type { Inquiry } from './lib/supabase';
 import {
   /* ── existing icons ── */
-  Sparkles, ArrowLeft, Cpu, Database, Zap, X, ExternalLink, ShieldCheck,
+  ArrowLeft, Cpu, Database, Zap, X, ExternalLink, ShieldCheck,
   /* ── new icons ── */
   Monitor, Brain, Palette, ShoppingCart, Video, BarChart3,
   Package, TrendingUp, Crown, Mail, Phone, MapPin, Send, Check,
@@ -940,6 +940,7 @@ function ContactSection({ scrollTo }: { scrollTo: (id: string) => void }) {
   const [submitted, setSubmitted] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
+  const [emailFailed, setEmailFailed] = useState(false);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     setForm(prev => ({ ...prev, [e.target.name]: e.target.value }));
@@ -958,6 +959,7 @@ function ContactSection({ scrollTo }: { scrollTo: (id: string) => void }) {
     e.preventDefault();
     setSubmitting(true);
     setSubmitError(null);
+    setEmailFailed(false);
     const serviceLabels = form.services.map(id => SERVICE_OPTIONS.find(s => s.id === id)?.label ?? id);
     const projectType   = serviceLabels.join(", ") || "General Inquiry";
     const packageLabel  = form.selectedPackage
@@ -978,7 +980,7 @@ function ContactSection({ scrollTo }: { scrollTo: (id: string) => void }) {
       /* 2 — fire edge function directly (handles admin + confirmation emails) */
       const supabaseUrl = import.meta.env.VITE_SUPABASE_URL as string;
       const supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY as string;
-      await fetch(`${supabaseUrl}/functions/v1/notify-new-inquiry`, {
+      const notifyRes = await fetch(`${supabaseUrl}/functions/v1/notify-new-inquiry`, {
         method: "POST",
         headers: {
           "Content-Type":  "application/json",
@@ -996,10 +998,19 @@ function ContactSection({ scrollTo }: { scrollTo: (id: string) => void }) {
         }),
       });
 
+      if (!notifyRes.ok) {
+        const errBody = await notifyRes.text().catch(() => "");
+        console.error('[AXY] notify-new-inquiry failed:', notifyRes.status, errBody);
+        if (dbErr) {
+          throw new Error("Could not save or send your request. Please try again or email us directly.");
+        }
+        setEmailFailed(true);
+      }
+
       setSubmitted(true);
     } catch (err) {
       console.error('[AXY] Submission error:', err);
-      setSubmitError("Transmission failed. Please try again or email us directly.");
+      setSubmitError(err instanceof Error ? err.message : "Transmission failed. Please try again or email us directly.");
     } finally {
       setSubmitting(false);
     }
@@ -1037,7 +1048,9 @@ function ContactSection({ scrollTo }: { scrollTo: (id: string) => void }) {
               {!submitted ? (
                 <motion.form
                   key="form"
-                  initial={{ opacity: 1 }}
+                  variants={containerVariants}
+                  initial="hidden"
+                  animate="visible"
                   exit={{ opacity: 0, y: -20, filter: "blur(10px)" }}
                   transition={{ duration: 0.5 }}
                   onSubmit={handleSubmit}
@@ -1185,9 +1198,18 @@ function ContactSection({ scrollTo }: { scrollTo: (id: string) => void }) {
                     <div className="text-[11px] font-mono text-white/30 uppercase tracking-widest">
                       Response within 24 hours // AX-PROTOCOL active
                     </div>
+                    {emailFailed && (
+                      <div className="text-[10px] font-mono text-orange-400/70 border border-orange-400/20 px-4 py-3 bg-orange-400/5 mt-2 max-w-sm">
+                        ⚠ Your request was saved, but the confirmation email couldn't be sent. We'll still see your inquiry — feel free to reach out directly too.
+                      </div>
+                    )}
                   </div>
                   <button
-                    onClick={() => setSubmitted(false)}
+                    onClick={() => {
+                      setForm({ name: "", email: "", services: [], selectedPackage: "", message: "" });
+                      setEmailFailed(false);
+                      setSubmitted(false);
+                    }}
                     className="text-[9px] uppercase tracking-[0.3em] font-mono text-white/25 hover:text-white transition-colors"
                   >
                     Send Another →
@@ -1611,15 +1633,6 @@ export default function App() {
         )}
       </AnimatePresence>
 
-      {/* Decorative sparkle */}
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 1.5, duration: 1 }}
-        className="fixed bottom-12 right-12 text-white/20 pointer-events-none z-10"
-      >
-        <Sparkles size={24} strokeWidth={1} />
-      </motion.div>
     </div>
   );
 }
