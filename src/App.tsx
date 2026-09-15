@@ -1048,7 +1048,9 @@ function ContactSection({ scrollTo }: { scrollTo: (id: string) => void }) {
               {!submitted ? (
                 <motion.form
                   key="form"
-                  initial={{ opacity: 1 }}
+                  variants={containerVariants}
+                  initial="hidden"
+                  animate="visible"
                   exit={{ opacity: 0, y: -20, filter: "blur(10px)" }}
                   transition={{ duration: 0.5 }}
                   onSubmit={handleSubmit}
@@ -1203,7 +1205,11 @@ function ContactSection({ scrollTo }: { scrollTo: (id: string) => void }) {
                     )}
                   </div>
                   <button
-                    onClick={() => setSubmitted(false)}
+                    onClick={() => {
+                      setForm({ name: "", email: "", services: [], selectedPackage: "", message: "" });
+                      setEmailFailed(false);
+                      setSubmitted(false);
+                    }}
                     className="text-[9px] uppercase tracking-[0.3em] font-mono text-white/25 hover:text-white transition-colors"
                   >
                     Send Another →
