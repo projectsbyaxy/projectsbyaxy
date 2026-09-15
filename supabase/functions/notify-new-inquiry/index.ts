@@ -15,7 +15,7 @@
 
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 
-const RESEND_API_KEY = Deno.env.get("RESEND_API_KEY") ?? "re_hNTQtNaq_C7hkS5MDJj2vKrCMTFTZWxAN";
+const RESEND_API_KEY = Deno.env.get("RESEND_API_KEY");
 const NOTIFY_EMAIL   = Deno.env.get("NOTIFY_EMAIL") ?? "mail@projectsbyaxy.com";
 const SITE_URL       = Deno.env.get("SITE_URL") ?? "https://projectsbyaxy.com";
 
@@ -47,6 +47,13 @@ serve(async (req: Request) => {
   }
 
   try {
+    if (!RESEND_API_KEY) {
+      console.error("[AXY] RESEND_API_KEY secret is not configured.");
+      return new Response(JSON.stringify({ error: "Email service not configured" }), {
+        status: 500, headers: { ...CORS, "Content-Type": "application/json" },
+      });
+    }
+
     const body   = await req.json();
     /* Support both direct call { record: {...} } and DB webhook format */
     const record = body?.record ?? body;
