@@ -23,7 +23,7 @@ import { supabase } from './lib/supabase';
 import type { Inquiry } from './lib/supabase';
 import {
   /* ── existing icons ── */
-  Sparkles, ArrowLeft, Cpu, Database, Zap, X, ExternalLink, ShieldCheck,
+  ArrowLeft, Cpu, Database, Zap, X, ExternalLink, ShieldCheck,
   /* ── new icons ── */
   Monitor, Brain, Palette, ShoppingCart, Video, BarChart3,
   Package, TrendingUp, Crown, Mail, Phone, MapPin, Send, Check,
@@ -1627,15 +1627,6 @@ export default function App() {
         )}
       </AnimatePresence>
 
-      {/* Decorative sparkle */}
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 1.5, duration: 1 }}
-        className="fixed bottom-12 right-12 text-white/20 pointer-events-none z-10"
-      >
-        <Sparkles size={24} strokeWidth={1} />
-      </motion.div>
     </div>
   );
 }
