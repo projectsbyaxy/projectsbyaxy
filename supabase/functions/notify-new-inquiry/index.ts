@@ -209,13 +209,13 @@ serve(async (req: Request) => {
     /* ── Fire both emails in parallel ── */
     await Promise.all([
       sendEmail({
-        from:    "ProjectsByAxy Alerts <onboarding@resend.dev>",
+        from:    "ProjectsByAxy Alerts <alerts@projectsbyaxy.com>",
         to:      [NOTIFY_EMAIL],
         subject: `[AX-INTAKE] ${services} — ${record.name}`,
         html:    adminHtml,
       }),
       sendEmail({
-        from:    "ProjectsByAxy <onboarding@resend.dev>",
+        from:    "ProjectsByAxy <no-reply@projectsbyaxy.com>",
         to:      [record.email],
         subject: `[AX-CONFIRM] Request received — We'll be in touch, ${record.name.split(" ")[0]}.`,
         html:    confirmHtml,
