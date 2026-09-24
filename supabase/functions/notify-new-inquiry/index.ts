@@ -81,21 +81,21 @@ serve(async (req: Request) => {
   <meta charset="UTF-8">
   <style>
     body { margin:0; padding:0; background:#000; font-family:'JetBrains Mono','Courier New',monospace; color:#f5f0e8; }
-    .wrap { max-width:560px; margin:40px auto; }
+    .wrap { max-width:560px; margin:40px auto; background:#000; padding:32px 24px; }
     .header { border-bottom:1px solid #1a1a1a; padding-bottom:20px; margin-bottom:28px; }
     .tag { font-size:10px; color:#f97316; letter-spacing:0.2em; text-transform:uppercase; margin-bottom:10px; }
     h1 { font-size:22px; font-weight:600; color:#f5f0e8; margin:0; letter-spacing:0.05em; text-transform:uppercase; }
-    .row { display:flex; border-bottom:1px solid #111; padding:12px 0; }
-    .label { font-size:10px; letter-spacing:0.15em; text-transform:uppercase; color:#555; width:130px; flex-shrink:0; padding-top:2px; }
-    .value { font-size:13px; color:#9a9188; flex:1; }
+    .row { border-bottom:1px solid #111; padding:12px 0; overflow:hidden; }
+    .label { float:left; font-size:10px; letter-spacing:0.15em; text-transform:uppercase; color:#555; width:130px; padding-top:2px; }
+    .value { margin-left:140px; font-size:13px; color:#9a9188; }
     .pkg-badge { display:inline-block; padding:3px 10px; background:#f97316; color:#000; font-size:10px; font-weight:700; letter-spacing:0.15em; text-transform:uppercase; }
     .msg-block { background:#0a0a0a; border:1px solid #1a1a1a; padding:16px; margin-top:8px; font-size:12px; color:#7a7270; line-height:1.7; }
     .cta { display:block; margin-top:28px; text-align:center; background:#fff; color:#000; text-decoration:none; padding:14px 28px; font-size:10px; letter-spacing:0.3em; text-transform:uppercase; font-weight:700; }
     .footer { margin-top:32px; font-size:9px; color:#333; letter-spacing:0.12em; text-transform:uppercase; text-align:center; }
   </style>
 </head>
-<body>
-  <div class="wrap">
+<body bgcolor="#000000" style="background:#000;">
+  <div class="wrap" style="background:#000;">
     <div class="header">
       <div class="tag">AX-INTAKE // New Lead Received</div>
       <h1>Incoming Inquiry</h1>
@@ -113,7 +113,7 @@ serve(async (req: Request) => {
     </div>
     <div class="row"><div class="label">Received</div><div class="value">${receivedAt} IST</div></div>
     <div style="margin-top:20px;">
-      <div class="label" style="margin-bottom:8px;">Message //</div>
+      <div class="label" style="float:none; margin-bottom:8px;">Message //</div>
       <div class="msg-block">${(record.message ?? "").replace(/\n/g, "<br>")}</div>
     </div>
     <a href="${SITE_URL}/#admin" class="cta">Open Admin Panel →</a>
@@ -132,17 +132,17 @@ serve(async (req: Request) => {
   <meta charset="UTF-8">
   <style>
     body { margin:0; padding:0; background:#000; font-family:'JetBrains Mono','Courier New',monospace; color:#f5f0e8; }
-    .wrap { max-width:560px; margin:40px auto; }
+    .wrap { max-width:560px; margin:40px auto; background:#000; padding:32px 24px; }
     .topbar { height:2px; background:linear-gradient(90deg,#f97316,#fb923c,#000); margin-bottom:32px; }
     .tag { font-size:10px; color:#f97316; letter-spacing:0.25em; text-transform:uppercase; margin-bottom:12px; }
     h1 { font-size:20px; font-weight:600; color:#f5f0e8; margin:0 0 6px 0; letter-spacing:0.08em; text-transform:uppercase; }
     .sub { font-size:11px; color:#555; letter-spacing:0.1em; margin-bottom:28px; }
     .block { border:1px solid #1a1a1a; padding:20px; margin-bottom:16px; background:#0a0a0a; }
     .block-tag { font-size:9px; color:#f97316; letter-spacing:0.2em; text-transform:uppercase; margin-bottom:12px; }
-    .row { display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #111; padding:10px 0; }
+    .row { border-bottom:1px solid #111; padding:10px 0; overflow:hidden; }
     .row:last-child { border-bottom:none; }
-    .rlabel { font-size:10px; letter-spacing:0.15em; text-transform:uppercase; color:#444; }
-    .rval { font-size:12px; color:#9a9188; text-align:right; max-width:280px; }
+    .rlabel { float:left; font-size:10px; letter-spacing:0.15em; text-transform:uppercase; color:#444; padding-top:2px; }
+    .rval { float:right; font-size:12px; color:#9a9188; text-align:right; max-width:280px; }
     .pkg-badge { display:inline-block; padding:3px 10px; background:#f97316; color:#000; font-size:10px; font-weight:700; letter-spacing:0.15em; text-transform:uppercase; }
     .msg-preview { font-size:11px; color:#555; line-height:1.7; font-style:italic; border-left:2px solid #1a1a1a; padding-left:14px; margin-top:4px; }
     .status-row { display:flex; align-items:center; gap:10px; margin-bottom:10px; }
@@ -151,8 +151,8 @@ serve(async (req: Request) => {
     a { color:#f97316; text-decoration:none; }
   </style>
 </head>
-<body>
-  <div class="wrap">
+<body bgcolor="#000000" style="background:#000;">
+  <div class="wrap" style="background:#000;">
     <div class="topbar"></div>
     <div class="tag">AX-CONFIRM // Transmission Acknowledged</div>
     <h1>Request Received, ${record.name.split(" ")[0]}.</h1>
@@ -179,7 +179,7 @@ serve(async (req: Request) => {
       </div>
       ${record.message ? `
       <div style="padding-top:14px;">
-        <div class="rlabel" style="margin-bottom:8px;">Your Brief //</div>
+        <div class="rlabel" style="float:none; margin-bottom:8px;">Your Brief //</div>
         <div class="msg-preview">${(record.message ?? "").replace(/\n/g, "<br>")}</div>
       </div>` : ""}
     </div>
@@ -209,13 +209,13 @@ serve(async (req: Request) => {
     /* ── Fire both emails in parallel ── */
     await Promise.all([
       sendEmail({
-        from:    "ProjectsByAxy Alerts <onboarding@resend.dev>",
+        from:    "ProjectsByAxy Alerts <alerts@projectsbyaxy.com>",
         to:      [NOTIFY_EMAIL],
         subject: `[AX-INTAKE] ${services} — ${record.name}`,
         html:    adminHtml,
       }),
       sendEmail({
-        from:    "ProjectsByAxy <onboarding@resend.dev>",
+        from:    "ProjectsByAxy <no-reply@projectsbyaxy.com>",
         to:      [record.email],
         subject: `[AX-CONFIRM] Request received — We'll be in touch, ${record.name.split(" ")[0]}.`,
         html:    confirmHtml,
