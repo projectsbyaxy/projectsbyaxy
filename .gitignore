@@ -6,3 +6,12 @@ coverage/
 *.log
 .env*
 !.env.example
+
+# brag video tooling scratch/cache — not part of the deliverable
+brag-output*/**/.hyperframes/
+brag-output*/**/.thumbnails/
+brag-output*/**/.waveform-cache/
+brag-output*/**/snapshots/
+brag-output*/site-capture/
+brag-output*/site-shots/
+brag-output*/composition/MONTAGEM UNKNOWN - AKXNESHIVA.mp3
