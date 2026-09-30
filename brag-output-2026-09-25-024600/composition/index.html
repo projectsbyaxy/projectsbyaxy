@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=1920, height=1080">
+    <title>ProjectsByAxy // Brag (Portfolio Playbook — Cinematic)</title>
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3.14.2/dist/gsap.min.js"></script>
+    <style>
+      * { box-sizing: border-box; }
+      body {
+        margin: 0;
+        background: #000000;
+        color: #ffffff;
+        font-family: "JetBrains Mono", monospace;
+        overflow: hidden;
+      }
+      #root {
+        position: relative;
+        width: 100%;
+        height: 100%;
+        overflow: hidden;
+        background: #000000;
+      }
+      .clip {
+        position: absolute;
+        inset: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      .display {
+        font-family: "Archivo Black", sans-serif;
+        text-transform: uppercase;
+      }
+      .mono {
+        font-family: "JetBrains Mono", monospace;
+        letter-spacing: 0.25em;
+        text-transform: uppercase;
+      }
+
+      #vignette {
+        position: absolute; inset: 0; z-index: 50; pointer-events: none;
+        background: radial-gradient(circle at 50% 50%, rgba(0,0,0,0) 35%, rgba(0,0,0,0.65) 100%);
+      }
+      #flash-r, #flash-g {
+        position: absolute; inset: 0; z-index: 58; pointer-events: none; mix-blend-mode: screen; opacity: 0;
+      }
+      #flash-r { background: #ff2d2d; }
+      #flash-g { background: #00e5ff; }
+      #flash {
+        position: absolute; inset: 0; z-index: 60; pointer-events: none;
+        background: #ffffff; opacity: 0;
+      }
+
+      #cold-open { display: flex; align-items: center; justify-content: center; position: relative; z-index: 55; }
+      #cold-mark { font-size: 34px; letter-spacing: 0.4em; opacity: 0; }
+      #cold-mark .ax { color: #fb923c; }
+      #cold-mark .slash { color: rgba(255,255,255,0.4); }
+
+      .glow {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: 1300px;
+        height: 1300px;
+        border-radius: 50%;
+        background: radial-gradient(circle, rgba(251,146,60,0.22) 0%, rgba(251,146,60,0) 70%);
+        pointer-events: none;
+        opacity: 0;
+      }
+
+      /* real rendered PDF page, full document contained in frame (never cropped — body copy must stay legible) */
+      .page-wrap { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; }
+      .page-shot {
+        height: 94%;
+        width: auto;
+        object-fit: contain;
+        box-shadow: 0 50px 140px rgba(0,0,0,0.85);
+        border: 1px solid rgba(251,146,60,0.28);
+        opacity: 0;
+        transform-origin: center center;
+      }
+
+      /* minimal corner caption, same restrained language as the site launch video */
+      .caption {
+        position: absolute;
+        left: 60px;
+        bottom: 64px;
+        z-index: 55;
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        opacity: 0;
+      }
+      .caption .bar { width: 3px; height: 34px; background: #fb923c; flex-shrink: 0; }
+      .caption .txt { font-size: 20px; font-family: "Archivo Black", sans-serif; text-transform: none; letter-spacing: 0.01em; color: #ffffff; text-shadow: 0 2px 12px rgba(0,0,0,0.8); }
+
+      #outro-black { position: absolute; inset: 0; background: #000000; opacity: 0; z-index: 45; }
+      #outro-cta { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; z-index: 56; opacity: 0; }
+      #outro-cta-inner { display: flex; flex-direction: column; align-items: center; gap: 10px; }
+      #outro-cta-line1 { font-size: 26px; letter-spacing: 0.3em; color: rgba(255,255,255,0.55); }
+      #outro-cta-line2 { font-size: 44px; letter-spacing: 0.02em; }
+      #outro-cta-line2 .ax { color: #fb923c; }
+    </style>
+  </head>
+  <body>
+    <div id="root" data-composition-id="brag-portfolio-playbook" data-start="0" data-width="1920" data-height="1080" data-duration="17.857">
+
+      <!-- ============ SCENE 1: COLD OPEN (0-1.357s) ============ -->
+      <section id="scene-cold" class="clip" data-start="0" data-duration="1.357" data-track-index="0">
+        <div class="glow" id="glow-cold"></div>
+        <div id="cold-open">
+          <div id="cold-mark" class="mono">AX-DOC <span class="slash">//</span> <span class="ax">001</span> <span class="slash">·</span> FREE RESOURCE</div>
+        </div>
+      </section>
+
+      <!-- ============ SCENE 2: COVER SLAM (1.357-3.157s) ============ -->
+      <section id="scene-cover" class="clip" data-start="1.357" data-duration="1.8" data-track-index="0">
+        <div class="glow" id="glow-cover"></div>
+        <div class="page-wrap"><img class="page-shot" id="shot-cover" src="assets/shots/page-01.png" alt=""></div>
+      </section>
+
+      <!-- ============ SCENE 3: WHY IT MATTERS (3.157-5.257s) ============ -->
+      <section id="scene-why" class="clip" data-start="3.157" data-duration="2.1" data-track-index="0">
+        <div class="page-wrap"><img class="page-shot" id="shot-why" src="assets/shots/page-02.png" alt=""></div>
+        <div class="caption" id="cap-why"><span class="bar"></span><span class="txt mono">Why It Matters //</span></div>
+      </section>
+
+      <!-- ============ SCENE 4: ANATOMY (5.257-7.657s) ============ -->
+      <section id="scene-anatomy" class="clip" data-start="5.257" data-duration="2.4" data-track-index="0">
+        <div class="page-wrap"><img class="page-shot" id="shot-anatomy" src="assets/shots/page-03.png" alt=""></div>
+        <div class="caption" id="cap-anatomy"><span class="bar"></span><span class="txt mono">The Anatomy //</span></div>
+      </section>
+
+      <!-- ============ SCENE 5: THE 6-STEP PROCESS (7.657-9.757s) ============ -->
+      <section id="scene-steps" class="clip" data-start="7.657" data-duration="2.1" data-track-index="0">
+        <div class="page-wrap"><img class="page-shot" id="shot-steps" src="assets/shots/page-04.png" alt=""></div>
+        <div class="caption" id="cap-steps"><span class="bar"></span><span class="txt mono">6 Steps To Ship //</span></div>
+      </section>
+
+      <!-- ============ SCENE 6: SKELETON PROMPT — PAYOFF (9.757-13.357s) ============ -->
+      <section id="scene-prompt" class="clip" data-start="9.757" data-duration="3.6" data-track-index="0">
+        <div class="glow" id="glow-prompt"></div>
+        <div class="page-wrap"><img class="page-shot" id="shot-prompt" src="assets/shots/page-05.png" alt=""></div>
+        <div class="caption" id="cap-prompt"><span class="bar"></span><span class="txt mono">The Skeleton Prompt //</span></div>
+      </section>
+
+      <!-- ============ SCENE 7: 6 MISTAKES (13.357-15.157s) ============ -->
+      <section id="scene-mistakes" class="clip" data-start="13.357" data-duration="1.8" data-track-index="0">
+        <div class="page-wrap"><img class="page-shot" id="shot-mistakes" src="assets/shots/page-06.png" alt=""></div>
+        <div class="caption" id="cap-mistakes"><span class="bar"></span><span class="txt mono">Avoid These //</span></div>
+      </section>
+
+      <!-- ============ SCENE 8: OUTRO / CTA (15.157-17.857s) ============ -->
+      <section id="scene-outro" class="clip" data-start="15.157" data-duration="2.7" data-track-index="0">
+        <div class="glow" id="glow-outro"></div>
+        <div class="page-wrap"><img class="page-shot" id="shot-outro" src="assets/shots/page-07.png" alt=""></div>
+        <div class="caption" id="cap-outro"><span class="bar"></span><span class="txt mono">Free Download //</span></div>
+      </section>
+      <div id="outro-black" class="clip" data-start="15.157" data-duration="2.7" data-track-index="1"></div>
+      <div id="outro-cta" class="clip" data-start="15.157" data-duration="2.7" data-track-index="2">
+        <div id="outro-cta-inner">
+          <div id="outro-cta-line1" class="mono">The Portfolio Playbook</div>
+          <div id="outro-cta-line2" class="display"><span class="ax">Link</span> in Bio.</div>
+        </div>
+      </div>
+
+      <!-- ============ ALWAYS-ON GRIT/TRANSITION LAYERS ============ -->
+      <div id="vignette" class="clip" data-start="0" data-duration="17.857" data-track-index="0"></div>
+      <div id="flash-r" class="clip" data-start="0" data-duration="17.857" data-track-index="0"></div>
+      <div id="flash-g" class="clip" data-start="0" data-duration="17.857" data-track-index="0"></div>
+      <div id="flash" class="clip" data-start="0" data-duration="17.857" data-track-index="0"></div>
+
+      <!-- ============ AUDIO ============ -->
+      <audio id="music" src="assets/music/akxneshiva.mp3" data-start="0" data-duration="17.857" data-track-index="20" data-automation="{&quot;version&quot;:1,&quot;lanes&quot;:[{&quot;target&quot;:&quot;volume&quot;,&quot;points&quot;:[{&quot;t&quot;:0,&quot;v&quot;:0.85},{&quot;t&quot;:17.5,&quot;v&quot;:0.85},{&quot;t&quot;:17.857,&quot;v&quot;:0}]}]}"></audio>
+
+      <audio id="sfx-cold" src="assets/sfx/glitch_002.ogg" data-start="0.05" data-duration="0.03" data-volume="0.5" data-track-index="21"></audio>
+      <audio id="sfx-cover" src="assets/sfx/impactSoft_heavy_000.ogg" data-start="1.357" data-duration="0.5" data-volume="0.6" data-track-index="21"></audio>
+      <audio id="sfx-prompt" src="assets/sfx/impactBell_heavy_000.ogg" data-start="9.757" data-duration="0.8" data-volume="0.5" data-track-index="21"></audio>
+      <audio id="sfx-outro" src="assets/sfx/impactBell_heavy_004.ogg" data-start="15.157" data-duration="0.3" data-volume="0.6" data-track-index="21"></audio>
+    </div>
+
+    <script>
+      var tl = gsap.timeline({ paused: true });
+
+      function bigHit(t) {
+        tl.set("#flash", { opacity: 0.9 }, t);
+        tl.to("#flash", { opacity: 0, duration: 0.07, ease: "power2.out" }, t + 0.01);
+        tl.set("#flash-r", { opacity: 0.5 }, t);
+        tl.set("#flash-g", { opacity: 0.5 }, t + 0.012);
+        tl.to("#flash-r", { opacity: 0, duration: 0.09 }, t + 0.02);
+        tl.to("#flash-g", { opacity: 0, duration: 0.09 }, t + 0.03);
+        tl.set("#root", { x: -14 }, t);
+        tl.to("#root", { x: 10, duration: 0.03, ease: "none" }, t + 0.035);
+        tl.to("#root", { x: -5, duration: 0.03, ease: "none" }, t + 0.072);
+        tl.to("#root", { x: 0, duration: 0.03, ease: "none" }, t + 0.109);
+      }
+      function softCut(t) {
+        tl.set("#flash", { opacity: 0.3 }, t);
+        tl.to("#flash", { opacity: 0, duration: 0.05, ease: "power2.out" }, t + 0.008);
+        tl.set("#flash-r", { opacity: 0.2 }, t);
+        tl.to("#flash-r", { opacity: 0, duration: 0.06 }, t + 0.015);
+      }
+      // real page render: fade in, then a slow, restrained Ken Burns push-in for the scene hold.
+      // Source shots are captured at 2x device scale, so a small (<=6%) scale never blurs body copy.
+      function showPage(sel, t, dur, fromScale, toScale, fromY, toY) {
+        fromScale = fromScale || 1.0;
+        toScale = toScale || 1.05;
+        fromY = fromY || 0;
+        toY = toY === undefined ? -10 : toY;
+        tl.fromTo(sel, { opacity: 0, scale: fromScale, y: fromY }, { opacity: 1, scale: fromScale, y: fromY, duration: 0.14, ease: "power2.out" }, t);
+        tl.to(sel, { scale: toScale, y: toY, duration: dur - 0.14, ease: "none" }, t + 0.14);
+      }
+      function hidePage(sel, t) {
+        tl.to(sel, { opacity: 0, duration: 0.06 }, t);
+      }
+
+      /* ===================== SCENE 1: COLD OPEN (0-1.357s) ===================== */
+      bigHit(0.05);
+      tl.fromTo("#glow-cold", { opacity: 0 }, { opacity: 1, duration: 0.5, ease: "power2.out" }, 0.05);
+      tl.set("#cold-mark", { opacity: 1 }, 0.05);
+      tl.to("#cold-mark", { opacity: 0.15, duration: 0.03 }, 0.12);
+      tl.to("#cold-mark", { opacity: 1, duration: 0.03 }, 0.16);
+      tl.to("#cold-mark", { opacity: 0.2, duration: 0.03 }, 0.32);
+      tl.to("#cold-mark", { opacity: 1, duration: 0.03 }, 0.38);
+      tl.to("#cold-mark", { opacity: 1, duration: 0.1 }, 0.6);
+
+      /* ===================== SCENE 2: COVER SLAM (1.357-3.157s) ===================== */
+      bigHit(1.357);
+      tl.fromTo("#glow-cover", { opacity: 0 }, { opacity: 1, duration: 0.2, ease: "power2.out" }, 1.357);
+      showPage("#shot-cover", 1.357, 1.8, 1.1, 1.02, 0, -6);
+
+      /* ===================== SCENE 3: WHY IT MATTERS (3.157-5.257s) ===================== */
+      softCut(3.157);
+      showPage("#shot-why", 3.157, 2.1, 1.0, 1.05, 0, -10);
+      tl.fromTo("#cap-why", { opacity: 0, x: -10 }, { opacity: 1, x: 0, duration: 0.15, ease: "power3.out" }, 3.25);
+
+      /* ===================== SCENE 4: ANATOMY (5.257-7.657s) ===================== */
+      softCut(5.257);
+      showPage("#shot-anatomy", 5.257, 2.4, 1.0, 1.05, 0, -10);
+      tl.fromTo("#cap-anatomy", { opacity: 0, x: -10 }, { opacity: 1, x: 0, duration: 0.15, ease: "power3.out" }, 5.35);
+
+      /* ===================== SCENE 5: THE 6-STEP PROCESS (7.657-9.757s) ===================== */
+      softCut(7.657);
+      showPage("#shot-steps", 7.657, 2.1, 1.0, 1.05, 0, -10);
+      tl.fromTo("#cap-steps", { opacity: 0, x: -10 }, { opacity: 1, x: 0, duration: 0.15, ease: "power3.out" }, 7.75);
+
+      /* ===================== SCENE 6: SKELETON PROMPT — PAYOFF (9.757-13.357s) ===================== */
+      /* This is the deliverable's payoff: gets its own impact, longest hold, and the slowest push-in. */
+      bigHit(9.757);
+      tl.fromTo("#glow-prompt", { opacity: 0 }, { opacity: 1, duration: 0.3, ease: "power2.out" }, 9.757);
+      showPage("#shot-prompt", 9.757, 3.6, 1.02, 1.06, 0, -14);
+      tl.fromTo("#cap-prompt", { opacity: 0, x: -10 }, { opacity: 1, x: 0, duration: 0.15, ease: "power3.out" }, 9.95);
+
+      /* ===================== SCENE 7: 6 MISTAKES (13.357-15.157s) — quick re-acceleration ===================== */
+      softCut(13.357);
+      showPage("#shot-mistakes", 13.357, 1.8, 1.0, 1.04, 0, -8);
+      tl.fromTo("#cap-mistakes", { opacity: 0, x: -10 }, { opacity: 1, x: 0, duration: 0.15, ease: "power3.out" }, 13.45);
+
+      /* ===================== SCENE 8: OUTRO / CTA (15.157-17.857s) ===================== */
+      bigHit(15.157);
+      tl.fromTo("#glow-outro", { opacity: 0 }, { opacity: 1, duration: 0.3, ease: "power2.out" }, 15.157);
+      showPage("#shot-outro", 15.157, 1.5, 1.0, 1.04, 0, -8);
+      tl.fromTo("#cap-outro", { opacity: 0, x: -10 }, { opacity: 1, x: 0, duration: 0.15, ease: "power3.out" }, 15.25);
+
+      // hard cut to black + CTA card for the final beat
+      tl.set("#outro-black", { opacity: 1 }, 16.657);
+      hidePage("#shot-outro", 16.657);
+      tl.to("#cap-outro", { opacity: 0, duration: 0.05 }, 16.657);
+      tl.to("#glow-outro", { opacity: 0, duration: 0.1 }, 16.657);
+      tl.fromTo("#outro-cta", { opacity: 0 }, { opacity: 1, duration: 0.01 }, 16.697);
+      tl.fromTo("#outro-cta-line1", { opacity: 0, y: 8 }, { opacity: 1, y: 0, duration: 0.15, ease: "power3.out" }, 16.72);
+      tl.fromTo("#outro-cta-line2", { opacity: 0, scale: 1.1 }, { opacity: 1, scale: 1, duration: 0.14, ease: "expo.out" }, 16.8);
+
+      window.__timelines["brag-portfolio-playbook"] = tl;
+    </script>
+  </body>
+</html>

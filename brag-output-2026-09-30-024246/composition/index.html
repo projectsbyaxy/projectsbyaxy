@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=1080, height=1920">
+    <title>ProjectsByAxy // Editorial Reel</title>
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3.14.2/dist/gsap.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@1,400;1,500&display=swap" rel="stylesheet">
+    <style>
+      * { box-sizing: border-box; }
+      body { margin: 0; background: #F4F0E8; overflow: hidden; }
+      #root { position: relative; width: 100%; height: 100%; overflow: hidden; background: #F4F0E8; }
+      .clip { position: absolute; inset: 0; }
+      .ch { display: inline-block; }
+
+      /* ---- type system ---- */
+      .setup { position: absolute; left: 0; right: 0; text-align: center; font-family: "Montserrat", sans-serif; font-style: italic; font-weight: 400; font-size: 44px; color: #141414; z-index: 12; }
+      .payoff { position: absolute; left: 0; right: 0; font-family: "Montserrat", sans-serif; font-weight: 900; color: #c2410c; line-height: 0.92; letter-spacing: -0.04em; z-index: 11; }
+      .payoff .pl { display: block; white-space: nowrap; }
+      .payoff.center { text-align: center; }
+      .white { position: absolute; left: 0; right: 0; text-align: center; font-family: "Montserrat", sans-serif; font-style: italic; font-weight: 500; font-size: 48px; color: #ffffff; text-shadow: 0 0 22px rgba(255,255,255,0.5); z-index: 3; }
+      .accent { position: absolute; left: 0; right: 0; text-align: center; font-family: "Montserrat", sans-serif; font-weight: 900; color: #fb923c; line-height: 0.95; letter-spacing: -0.03em; text-shadow: 0 0 30px rgba(251,146,60,0.75); z-index: 3; }
+      .accent .pl { display: block; white-space: nowrap; }
+
+      /* ---- swoosh stars ---- */
+      .star { position: absolute; z-index: 2; overflow: visible; }
+      .star path { fill: #0b0b0b; }
+      .star.glow path { fill: #fb923c; }
+      .star.glow { filter: blur(34px); opacity: 0.9; }
+      .star.spark path { fill: #fb923c; }
+
+      .blackbg { position: absolute; inset: 0; background: #050505; }
+
+      /* ---- laptop mockup ---- */
+      .laptop { position: absolute; left: 48px; top: 780px; width: 984px; opacity: 0; z-index: 20; }
+      .laptop .lid { width: 984px; padding: 18px 18px 22px; background: #101010; border: 2px solid #2c2c2c; border-radius: 28px 28px 10px 10px; box-shadow: 0 60px 110px rgba(60,35,10,0.33), 0 18px 40px rgba(0,0,0,0.22); position: relative; }
+      .laptop .cam { position: absolute; left: 488px; top: 6px; width: 7px; height: 7px; border-radius: 50%; background: #333; }
+      .laptop .screen { width: 944px; height: 590px; border-radius: 8px; overflow: hidden; position: relative; background: #000; }
+      .laptop .screen video { position: absolute; left: 0; top: 0; width: 944px; height: 590px; object-fit: cover; }
+      .laptop .base { width: 1064px; height: 30px; margin-left: -40px; position: relative; background: linear-gradient(#e6e2da, #bdb8af 55%, #8f8a82); border-radius: 4px 4px 26px 26px; box-shadow: 0 30px 50px rgba(0,0,0,0.2); }
+      .laptop .notch { position: absolute; left: 447px; top: 0; width: 170px; height: 10px; background: #a39e95; border-radius: 0 0 10px 10px; }
+
+      /* ---- phone mockup ---- */
+      #phone-rig { position: absolute; left: 545px; top: 790px; width: 474px; opacity: 0; z-index: 20; }
+      .phone-body { width: 474px; padding: 16px; background: #0e0e0e; border: 2px solid #2d2d2d; border-radius: 70px; box-shadow: 0 60px 110px rgba(60,35,10,0.33), 0 18px 40px rgba(0,0,0,0.22); position: relative; }
+      .pscreen { width: 438px; height: 892px; border-radius: 54px; overflow: hidden; position: relative; background: #000; }
+      .pscreen video { position: absolute; left: 0; top: 0; width: 438px; height: 892px; object-fit: cover; }
+      .island { position: absolute; left: 175px; top: 14px; width: 120px; height: 34px; background: #000; border-radius: 20px; z-index: 2; }
+      .pbtn { position: absolute; width: 5px; background: #1f1f1f; border-radius: 3px; }
+
+      /* ---- floating service chips ---- */
+      .chip { position: absolute; display: flex; align-items: center; gap: 14px; padding: 18px 24px; background: #0d0d0d; border: 1.5px solid rgba(251,146,60,0.75); color: #f5f0e8; font-family: "JetBrains Mono", monospace; font-size: 21px; letter-spacing: 0.16em; text-transform: uppercase; white-space: nowrap; box-shadow: 0 24px 50px rgba(0,0,0,0.25); opacity: 0; z-index: 15; }
+      .chip .box { width: 24px; height: 24px; border: 1.5px solid #fb923c; color: #fb923c; font-size: 17px; line-height: 21px; text-align: center; }
+
+      /* ---- barcode ---- */
+      .barcode { position: absolute; z-index: 12; text-align: center; }
+      .bc-cap { font-family: "JetBrains Mono", monospace; font-size: 15px; letter-spacing: 0.28em; color: #3a3a3a; margin-top: 10px; text-transform: uppercase; }
+
+      /* ---- outro ---- */
+      #av-group { position: absolute; left: 372px; top: 640px; width: 336px; height: 336px; opacity: 0; z-index: 12; }
+      #av-ring { position: absolute; left: 0; top: 0; width: 336px; height: 336px; border-radius: 50%; background: conic-gradient(#fb923c, #c2410c, #1a1a1a, #fb923c); }
+      #av { position: absolute; left: 18px; top: 18px; width: 300px; height: 300px; border-radius: 50%; overflow: hidden; border: 7px solid #F4F0E8; }
+      #av img { width: 100%; height: 100%; object-fit: cover; display: block; }
+      #glint { position: absolute; left: 130px; top: -80px; width: 28px; height: 460px; background: linear-gradient(rgba(255,255,255,0), rgba(255,255,255,0.85), rgba(255,255,255,0)); }
+      .url { position: absolute; left: 0; right: 0; text-align: center; font-family: "JetBrains Mono", monospace; font-size: 30px; letter-spacing: 0.22em; color: #c2410c; z-index: 12; }
+
+      /* ---- CTA ---- */
+      .handle { position: absolute; left: 0; right: 0; text-align: center; font-family: "JetBrains Mono", monospace; font-size: 30px; letter-spacing: 0.14em; color: #141414; z-index: 12; }
+      #cta-pill { position: absolute; left: 230px; top: 1235px; width: 620px; height: 112px; background: #0d0d0d; color: #F4F0E8; display: flex; align-items: center; justify-content: center; gap: 22px; font-family: "JetBrains Mono", monospace; font-weight: 700; font-size: 30px; letter-spacing: 0.3em; text-transform: uppercase; overflow: hidden; opacity: 0; z-index: 14; box-shadow: 0 30px 60px rgba(0,0,0,0.22); }
+      #cta-arrow { display: inline-block; color: #fb923c; }
+      #pill-glint { position: absolute; left: 290px; top: -64px; width: 36px; height: 240px; background: linear-gradient(rgba(255,255,255,0), rgba(255,255,255,0.8), rgba(255,255,255,0)); }
+      #cursor { position: absolute; left: 589px; top: 1285px; width: 64px; height: 64px; opacity: 0; z-index: 40; filter: drop-shadow(0 6px 10px rgba(0,0,0,0.25)); }
+      #ripple { position: absolute; left: 550px; top: 1240px; width: 100px; height: 100px; border-radius: 50%; border: 4px solid #fb923c; opacity: 0; z-index: 39; }
+      #up-arrow { position: absolute; left: 510px; top: 560px; width: 60px; height: 90px; opacity: 0; z-index: 12; }
+    </style>
+  </head>
+  <body>
+    <div id="root" data-composition-id="brag-editorial-reel" data-start="0" data-width="1080" data-height="1920" data-duration="23.257">
+
+      <!-- ================= S1: FOUNDER CUTOUT (0 – 3.157) ================= -->
+      <section id="s1-back" class="clip" data-start="0" data-duration="3.157" data-track-index="0" style="z-index:10;" data-layout-allow-overflow>
+        <svg id="s1-st-tr" class="star" style="left:585px; top:-365px;" width="1130" height="1130" viewBox="-100 -100 200 200"><path d="M0,-100 C3,-18 18,-3 100,0 C18,3 3,18 0,100 C-3,18 -18,3 -100,0 C-18,-3 -3,-18 0,-100 Z"/></svg>
+        <svg id="s1-st-bl" class="star" style="left:-630px; top:1120px;" width="1120" height="1120" viewBox="-100 -100 200 200"><path d="M0,-100 C3,-18 18,-3 100,0 C18,3 3,18 0,100 C-3,18 -18,3 -100,0 C-18,-3 -3,-18 0,-100 Z"/></svg>
+        <div id="s1-setup" class="setup type" style="top:330px;">we don't build</div>
+        <div id="s1-pay" data-layout-allow-overlap class="payoff center" style="top:555px; font-size:172px;" data-layout-allow-occlusion><span class="pl" data-layout-allow-overlap>websites.</span></div>
+      </section>
+      <video id="founder-vid" src="assets/video/founder-cutout.webm" muted playsinline data-start="0.12" data-duration="3.03" data-track-index="1"
+        style="position:absolute; left:-410px; top:567px; width:1900px; height:1404px; z-index:20;"></video>
+
+      <!-- ================= S2: LAPTOP / LIVE HERO (3.157 – 6.157) ================= -->
+      <section id="s2" class="clip" data-start="3.157" data-duration="3" data-track-index="0" style="z-index:10;" data-layout-allow-overflow>
+        <svg id="s2-st-tr" class="star" style="left:600px; top:-380px;" width="1120" height="1120" viewBox="-100 -100 200 200"><path d="M0,-100 C3,-18 18,-3 100,0 C18,3 3,18 0,100 C-3,18 -18,3 -100,0 C-18,-3 -3,-18 0,-100 Z"/></svg>
+        <svg id="s2-st-bl" class="star" style="left:-600px; top:1160px;" width="1080" height="1080" viewBox="-100 -100 200 200"><path d="M0,-100 C3,-18 18,-3 100,0 C18,3 3,18 0,100 C-3,18 -18,3 -100,0 C-18,-3 -3,-18 0,-100 Z"/></svg>
+        <div id="s2-setup" class="setup type" style="top:330px;">we engineer</div>
+        <div id="s2-pay" data-layout-allow-overlap class="payoff" style="top:415px; font-size:130px;"><span class="pl" data-layout-allow-overlap style="margin-left:150px;">digital</span><span class="pl" data-layout-allow-overlap style="margin-left:60px;">ecosystems.</span></div>
+        <div id="s2-bar" class="barcode" style="left:340px; top:1585px; width:400px;"><svg id="bc-svg" width="400" height="74"></svg><div class="bc-cap">PBA — 2026 // Built in Hyderabad</div></div>
+      </section>
+      <div id="laptop-a" class="laptop">
+        <div class="lid"><div class="cam"></div><div class="screen">
+          <video id="vid-hero" src="assets/video/rec-desktop-hero.mp4" muted playsinline data-start="3.157" data-duration="3" data-track-index="2"></video>
+        </div></div>
+        <div class="base"><div class="notch"></div></div>
+      </div>
+
+      <!-- ================= S3: BLACK (6.157 – 7.957) ================= -->
+      <section id="s3" class="clip" data-start="6.157" data-duration="1.8" data-track-index="0" style="z-index:40;" data-layout-allow-overflow>
+        <div class="blackbg"></div>
+        <svg id="s3-st-tl" class="star glow" style="left:-760px; top:-520px;" width="1400" height="1400" viewBox="-100 -100 200 200"><path d="M0,-100 C3,-18 18,-3 100,0 C18,3 3,18 0,100 C-3,18 -18,3 -100,0 C-18,-3 -3,-18 0,-100 Z"/></svg>
+        <svg id="s3-st-br" class="star glow" style="left:440px; top:1040px;" width="1400" height="1400" viewBox="-100 -100 200 200"><path d="M0,-100 C3,-18 18,-3 100,0 C18,3 3,18 0,100 C-3,18 -18,3 -100,0 C-18,-3 -3,-18 0,-100 Z"/></svg>
+        <div id="s3-white" class="white type" style="top:850px;">measured in</div>
+        <div id="s3-acc" data-layout-allow-overlap class="accent" style="top:930px; font-size:84px;"><span class="pl" data-layout-allow-overlap>conversions,</span><span class="pl" data-layout-allow-overlap>not aesthetics.</span></div>
+      </section>
+
+      <!-- ================= S4: PHONE / LIVE MOBILE SCROLL (7.957 – 10.957) ================= -->
+      <section id="s4" class="clip" data-start="7.957" data-duration="3" data-track-index="0" style="z-index:10;" data-layout-allow-overflow>
+        <svg id="s4-st-tr" class="star" style="left:590px; top:-370px;" width="1120" height="1120" viewBox="-100 -100 200 200"><path d="M0,-100 C3,-18 18,-3 100,0 C18,3 3,18 0,100 C-3,18 -18,3 -100,0 C-18,-3 -3,-18 0,-100 Z"/></svg>
+        <svg id="s4-st-bl" class="star" style="left:-630px; top:1130px;" width="1120" height="1120" viewBox="-100 -100 200 200"><path d="M0,-100 C3,-18 18,-3 100,0 C18,3 3,18 0,100 C-3,18 -18,3 -100,0 C-18,-3 -3,-18 0,-100 Z"/></svg>
+        <div id="s4-setup" class="setup type" style="top:300px;">for founders who</div>
+        <div id="s4-pay" data-layout-allow-overlap class="payoff" style="top:385px; font-size:118px;"><span class="pl" data-layout-allow-overlap style="margin-left:80px;">dare to</span><span class="pl" data-layout-allow-overlap style="margin-left:330px;">think</span><span class="pl" data-layout-allow-overlap style="margin-left:60px;">differently.</span></div>
+        <div id="chip-1" class="chip" style="left:60px; top:880px; filter:blur(2px);"><span class="box">✓</span>Web Development</div>
+        <div id="chip-2" class="chip" style="left:50px; top:1100px;"><span class="box">✓</span>Brand Identity</div>
+        <div id="chip-3" class="chip" style="left:80px; top:1320px;"><span class="box">✓</span>AI Content</div>
+      </section>
+      <div id="phone-rig">
+        <div class="phone-body">
+          <div class="pbtn" style="right:-7px; top:250px; height:120px;"></div>
+          <div class="pbtn" style="left:-7px; top:200px; height:70px;"></div>
+          <div class="pbtn" style="left:-7px; top:290px; height:70px;"></div>
+          <div class="pscreen">
+            <video id="vid-mobile" src="assets/video/rec-mobile-scroll.mp4" muted playsinline data-start="7.957" data-duration="3" data-track-index="2"></video>
+            <div class="island"></div>
+          </div>
+        </div>
+      </div>
+      <section id="s4-front" class="clip" data-start="7.957" data-duration="3" data-track-index="3" style="z-index:30;" data-layout-allow-overflow>
+        <div id="chip-4" class="chip" style="left:-10px; top:1610px; filter:blur(5px);"><span class="box">✓</span>Video &amp; Reels</div>
+      </section>
+
+      <!-- ================= S5: BLACK (10.957 – 12.757) ================= -->
+      <section id="s5" class="clip" data-start="10.957" data-duration="1.8" data-track-index="0" style="z-index:40;" data-layout-allow-overflow>
+        <div class="blackbg"></div>
+        <svg id="s5-st-tr" class="star glow" style="left:440px; top:-520px;" width="1400" height="1400" viewBox="-100 -100 200 200"><path d="M0,-100 C3,-18 18,-3 100,0 C18,3 3,18 0,100 C-3,18 -18,3 -100,0 C-18,-3 -3,-18 0,-100 Z"/></svg>
+        <svg id="s5-st-bl" class="star glow" style="left:-760px; top:1040px;" width="1400" height="1400" viewBox="-100 -100 200 200"><path d="M0,-100 C3,-18 18,-3 100,0 C18,3 3,18 0,100 C-3,18 -18,3 -100,0 C-18,-3 -3,-18 0,-100 Z"/></svg>
+        <div id="s5-white" class="white type" style="top:850px;">no scope creep.</div>
+        <div id="s5-acc" data-layout-allow-overlap class="accent" style="top:930px; font-size:96px;"><span class="pl" data-layout-allow-overlap>no agency</span><span class="pl" data-layout-allow-overlap>theatre.</span></div>
+      </section>
+
+      <!-- ================= S6: LAPTOP / LIVE INTAKE (12.757 – 16.357) ================= -->
+      <section id="s6" class="clip" data-start="12.757" data-duration="3.6" data-track-index="0" style="z-index:10;" data-layout-allow-overflow>
+        <svg id="s6-st-tr" class="star" style="left:585px; top:-365px;" width="1130" height="1130" viewBox="-100 -100 200 200"><path d="M0,-100 C3,-18 18,-3 100,0 C18,3 3,18 0,100 C-3,18 -18,3 -100,0 C-18,-3 -3,-18 0,-100 Z"/></svg>
+        <svg id="s6-st-bl" class="star" style="left:-630px; top:1120px;" width="1120" height="1120" viewBox="-100 -100 200 200"><path d="M0,-100 C3,-18 18,-3 100,0 C18,3 3,18 0,100 C-3,18 -18,3 -100,0 C-18,-3 -3,-18 0,-100 Z"/></svg>
+        <div id="s6-setup" class="setup type" style="top:330px;">just</div>
+        <div id="s6-pay" data-layout-allow-overlap class="payoff" style="top:415px; font-size:130px;"><span class="pl" data-layout-allow-overlap style="margin-left:110px;">precision</span><span class="pl" data-layout-allow-overlap style="margin-left:70px;">execution.</span></div>
+      </section>
+      <div id="laptop-b" class="laptop">
+        <div class="lid"><div class="cam"></div><div class="screen">
+          <video id="vid-intake" data-layout-allow-overflow src="assets/video/rec-desktop-intake.mp4" muted playsinline data-start="12.757" data-duration="3.6" data-track-index="2"></video>
+        </div></div>
+        <div class="base"><div class="notch"></div></div>
+      </div>
+
+      <!-- ================= S7: OUTRO (16.357 – 19.057) ================= -->
+      <section id="s7" class="clip" data-start="16.357" data-duration="6.9" data-track-index="0" style="z-index:10;" data-layout-allow-overflow>
+        <div id="av-group">
+          <div id="av-ring"></div>
+          <div id="av"><img src="assets/img/avatar.png" alt=""><div id="glint"></div></div>
+        </div>
+        <svg id="s7-spark" class="star spark" style="left:640px; top:600px; z-index:13;" width="130" height="130" viewBox="-100 -100 200 200"><path d="M0,-100 C3,-18 18,-3 100,0 C18,3 3,18 0,100 C-3,18 -18,3 -100,0 C-18,-3 -3,-18 0,-100 Z"/></svg>
+        <div id="s7-line" class="setup type" style="top:1030px;">shift your reality.</div>
+        <div id="s7-url" class="url" style="top:1108px;">projectsbyaxy.com</div>
+
+        <!-- CTA: avatar becomes a profile header, "link in bio", cursor clicks the button -->
+        <svg id="s8-st-tr" class="star" style="left:585px; top:-365px;" width="1130" height="1130" viewBox="-100 -100 200 200"><path d="M0,-100 C3,-18 18,-3 100,0 C18,3 3,18 0,100 C-3,18 -18,3 -100,0 C-18,-3 -3,-18 0,-100 Z"/></svg>
+        <svg id="s8-st-bl" class="star" style="left:-630px; top:1120px;" width="1120" height="1120" viewBox="-100 -100 200 200"><path d="M0,-100 C3,-18 18,-3 100,0 C18,3 3,18 0,100 C-3,18 -18,3 -100,0 C-18,-3 -3,-18 0,-100 Z"/></svg>
+        <div id="cta-handle" class="handle type" style="top:470px;">@projectsbyaxy</div>
+        <svg id="up-arrow" viewBox="0 0 60 90"><path d="M30 4 L54 34 L40 34 L40 86 L20 86 L20 34 L6 34 Z" fill="#c2410c"/></svg>
+        <div id="cta-setup" class="setup type" style="top:690px;">click the</div>
+        <div id="cta-pay" class="payoff" style="top:770px; font-size:220px;"><span class="pl" data-layout-allow-overlap style="margin-left:240px;">link</span><span class="pl" data-layout-allow-overlap style="margin-left:330px;">in bio</span></div>
+        <div id="cta-pill"><div id="pill-glint"></div><span>to get started</span><span id="cta-arrow">→</span></div>
+        <div id="ripple"></div>
+        <svg id="cursor" viewBox="0 0 24 24"><path d="M4 2 L4 20 L9 15 L12.5 22 L15.5 20.5 L12 13.5 L19 13.5 Z" fill="#ffffff" stroke="#000000" stroke-width="1.3" stroke-linejoin="round"/></svg>
+      </section>
+      <div id="end-black" class="clip" data-start="22.957" data-duration="0.3" data-track-index="5" style="background:#000; z-index:95; opacity:0;"></div>
+
+      <!-- ================= AUDIO ================= -->
+      <audio id="music" src="assets/music/akxneshiva.mp3" data-start="0" data-duration="23.257" data-track-index="20" data-automation="{&quot;version&quot;:1,&quot;lanes&quot;:[{&quot;target&quot;:&quot;volume&quot;,&quot;points&quot;:[{&quot;t&quot;:0,&quot;v&quot;:0.85},{&quot;t&quot;:22.7,&quot;v&quot;:0.85},{&quot;t&quot;:23.257,&quot;v&quot;:0}]}]}"></audio>
+      <audio id="sfx-s1" src="assets/sfx/impactSoft_heavy_000.ogg" data-start="1.357" data-duration="0.5" data-volume="0.5" data-track-index="21"></audio>
+      <audio id="sfx-lapa" src="assets/sfx/impactGeneric_light_000.ogg" data-start="3.9" data-duration="0.13" data-volume="0.35" data-track-index="21"></audio>
+      <audio id="sfx-s3" src="assets/sfx/impactSoft_medium_001.ogg" data-start="6.157" data-duration="0.18" data-volume="0.45" data-track-index="21"></audio>
+      <audio id="sfx-phone" src="assets/sfx/impactGeneric_light_000.ogg" data-start="8.75" data-duration="0.13" data-volume="0.35" data-track-index="21"></audio>
+      <audio id="sfx-s5" src="assets/sfx/impactSoft_medium_001.ogg" data-start="10.957" data-duration="0.18" data-volume="0.45" data-track-index="21"></audio>
+      <audio id="sfx-lapb" src="assets/sfx/impactGeneric_light_000.ogg" data-start="13.45" data-duration="0.13" data-volume="0.35" data-track-index="21"></audio>
+      <audio id="clk-1" src="assets/sfx/mouseclick1.ogg" data-start="12.957" data-duration="0.059" data-volume="0.55" data-track-index="22"></audio>
+      <audio id="clk-2" src="assets/sfx/mouseclick1.ogg" data-start="13.557" data-duration="0.059" data-volume="0.55" data-track-index="22"></audio>
+      <audio id="clk-3" src="assets/sfx/mouseclick1.ogg" data-start="14.187" data-duration="0.059" data-volume="0.55" data-track-index="22"></audio>
+      <audio id="clk-4" src="assets/sfx/mouseclick1.ogg" data-start="14.397" data-duration="0.059" data-volume="0.55" data-track-index="22"></audio>
+      <audio id="clk-5" src="assets/sfx/mouseclick1.ogg" data-start="14.667" data-duration="0.059" data-volume="0.55" data-track-index="22"></audio>
+      <audio id="sfx-outro" src="assets/sfx/impactBell_heavy_004.ogg" data-start="16.42" data-duration="0.3" data-volume="0.4" data-track-index="21"></audio>
+      <audio id="sfx-pill" src="assets/sfx/impactGeneric_light_000.ogg" data-start="20.6" data-duration="0.13" data-volume="0.35" data-track-index="21"></audio>
+      <audio id="clk-cta" src="assets/sfx/mouseclick1.ogg" data-start="21.457" data-duration="0.059" data-volume="0.6" data-track-index="22"></audio>
+      <audio id="sfx-cta" src="assets/sfx/impactSoft_heavy_000.ogg" data-start="21.457" data-duration="0.5" data-volume="0.45" data-track-index="23"></audio>
+    </div>
+
+    <script>
+      var tl = gsap.timeline({ paused: true });
+
+      // split typed lines into per-letter spans (deterministic, before the timeline is built)
+      document.querySelectorAll(".type").forEach(function (el) {
+        var txt = el.textContent; el.textContent = "";
+        for (var i = 0; i < txt.length; i++) {
+          var s = document.createElement("span"); s.className = "ch";
+          s.textContent = txt[i] === " " ? " " : txt[i];
+          el.appendChild(s);
+        }
+      });
+      // barcode bars
+      (function () {
+        var w = [3,1,2,1,4,1,1,3,2,1,1,2,3,1,4,2,1,1,3,1,2,2,1,4,1,1,2,3,1,2,1,1,3,2,4,1,2,1,3,1,1,2];
+        var svg = document.getElementById("bc-svg"), x = 4, ns = "http://www.w3.org/2000/svg";
+        for (var i = 0; i < w.length && x < 396; i++) {
+          if (i % 2 === 0) { var r = document.createElementNS(ns, "rect"); r.setAttribute("x", x); r.setAttribute("y", 0); r.setAttribute("width", w[i] * 3); r.setAttribute("height", 74); r.setAttribute("fill", "#111"); svg.appendChild(r); }
+          x += w[i] * 3 + 2;
+        }
+      })();
+
+      function typeIn(sel, t, per) {
+        var chars = document.querySelectorAll(sel + " .ch");
+        gsap.set(chars, { opacity: 0 });
+        tl.fromTo(chars, { opacity: 0, y: -22, scale: 0.5 }, { opacity: 1, y: 0, scale: 1, duration: 0.22, ease: "back.out(2.4)", stagger: per || 0.04, immediateRender: false }, t);
+      }
+      function blurIn(sel, t, stagger, dur) {
+        var lines = document.querySelectorAll(sel + " .pl");
+        gsap.set(lines, { opacity: 0 });
+        tl.fromTo(lines, { opacity: 0, filter: "blur(28px)", y: 46, scale: 1.06 }, { opacity: 1, filter: "blur(0px)", y: 0, scale: 1, duration: dur || 0.5, ease: "power3.out", stagger: stagger || 0.28, immediateRender: false }, t);
+      }
+      function blurOut(sels, t) {
+        tl.to(sels, { opacity: 0, filter: "blur(16px)", duration: 0.18, ease: "power2.in" }, t);
+      }
+      function star(sel, t, dur, r0, r1) {
+        gsap.set(sel, { scale: 0, rotation: r0, transformOrigin: "50% 50%" });
+        tl.to(sel, { scale: 1, duration: 0.85, ease: "expo.out" }, t);
+        tl.to(sel, { rotation: r1, duration: dur, ease: "sine.out" }, t);
+      }
+      function pushOut(sels, t) {
+        tl.to(sels, { x: -1300, filter: "blur(10px)", duration: 0.3, ease: "power3.in" }, t);
+      }
+
+      /* ===== S1: founder cutout rises, "websites." blurs in behind his head on the first strong beat ===== */
+      star("#s1-st-tr", 0.0, 3.1, -4, 12);
+      star("#s1-st-bl", 0.08, 3.1, -4, 12);
+      typeIn("#s1-setup", 0.12, 0.045);
+      gsap.set("#founder-vid", { y: 720, scale: 0.86, transformOrigin: "50% 100%" });
+      tl.to("#founder-vid", { y: 0, scale: 1, duration: 1.0, ease: "expo.out" }, 0.14);
+      tl.to("#founder-vid", { scale: 1.035, duration: 1.6, ease: "none" }, 1.2);
+      blurIn("#s1-pay", 1.357, 0.28, 0.55);
+      pushOut(["#s1-back", "#founder-vid"], 2.857);
+
+      /* ===== S2: laptop with the live desktop hero recording ===== */
+      star("#s2-st-tr", 3.157, 3.0, -6, 10);
+      star("#s2-st-bl", 3.2, 3.0, -6, 14);
+      typeIn("#s2-setup", 3.2, 0.045);
+      gsap.set("#laptop-a", { opacity: 0, x: 1150, rotation: 7, transformOrigin: "50% 100%" });
+      tl.set("#laptop-a", { opacity: 1 }, 3.157);
+      tl.to("#laptop-a", { x: 0, rotation: 0, duration: 0.8, ease: "expo.out" }, 3.25);
+      tl.to("#laptop-a", { y: -16, duration: 2.0, ease: "sine.inOut" }, 4.1);
+      tl.set("#laptop-a", { opacity: 0 }, 6.157);
+      blurIn("#s2-pay", 3.757, 0.3, 0.55);
+      gsap.set("#s2-bar", { opacity: 0, y: 20 });
+      tl.to("#s2-bar", { opacity: 1, y: 0, duration: 0.4, ease: "power3.out" }, 4.0);
+
+      /* ===== S3: black interstitial ===== */
+      star("#s3-st-tl", 6.157, 1.8, 10, -20);
+      star("#s3-st-br", 6.157, 1.8, -10, 20);
+      typeIn("#s3-white", 6.2, 0.035);
+      blurIn("#s3-acc", 6.657, 0.24, 0.45);
+      blurOut(["#s3-white", "#s3-acc"], 7.75);
+
+      /* ===== S4: tilted phone with the live mobile scroll, floating DOF service chips ===== */
+      star("#s4-st-tr", 7.957, 3.0, -4, 12);
+      star("#s4-st-bl", 8.0, 3.0, -2, 14);
+      typeIn("#s4-setup", 8.0, 0.035);
+      gsap.set("#phone-rig", { opacity: 0, x: 750, y: 160, rotation: 16, transformOrigin: "50% 50%" });
+      tl.set("#phone-rig", { opacity: 1 }, 7.957);
+      tl.to("#phone-rig", { x: 0, y: 0, rotation: 6, duration: 0.85, ease: "expo.out" }, 8.05);
+      tl.to("#phone-rig", { rotation: 3.5, y: -18, duration: 2.0, ease: "sine.inOut" }, 8.95);
+      tl.set("#phone-rig", { opacity: 0 }, 10.957);
+      blurIn("#s4-pay", 8.557, 0.28, 0.5);
+      [["#chip-2", 9.0, 1, 1], ["#chip-3", 9.15, 1, 1], ["#chip-1", 9.3, 0.85, 0.75], ["#chip-4", 9.4, 1.45, 1]].forEach(function (c) {
+        gsap.set(c[0], { opacity: 0, scale: c[2] * 0.6, y: 30 });
+        tl.to(c[0], { opacity: c[3], scale: c[2], y: 0, duration: 0.5, ease: "back.out(1.8)" }, c[1]);
+        tl.to(c[0], { y: -14, duration: 0.7, ease: "sine.inOut", repeat: 1, yoyo: true }, c[1] + 0.55);
+      });
+
+      /* ===== S5: black interstitial ===== */
+      star("#s5-st-tr", 10.957, 1.8, 15, -10);
+      star("#s5-st-bl", 10.957, 1.8, -10, 15);
+      typeIn("#s5-white", 11.0, 0.03);
+      blurIn("#s5-acc", 11.557, 0.24, 0.45);
+      blurOut(["#s5-white", "#s5-acc"], 12.55);
+
+      /* ===== S6: laptop with the live intake-form recording; camera pushes into the form as it's filled ===== */
+      star("#s6-st-tr", 12.757, 3.6, -4, 12);
+      star("#s6-st-bl", 12.8, 3.6, -4, 12);
+      typeIn("#s6-setup", 12.8, 0.06);
+      gsap.set("#laptop-b", { opacity: 0, y: 950, transformOrigin: "50% 100%" });
+      tl.set("#laptop-b", { opacity: 1 }, 12.757);
+      tl.to("#laptop-b", { y: 0, duration: 0.75, ease: "expo.out" }, 12.8);
+      tl.to("#laptop-b", { y: -12, duration: 2.4, ease: "sine.inOut" }, 13.6);
+      tl.set("#laptop-b", { opacity: 0 }, 16.357);
+      blurIn("#s6-pay", 13.357, 0.3, 0.5);
+      gsap.set("#vid-intake", { transformOrigin: "0 0", scale: 1, x: 0, y: 0 });
+      tl.to("#vid-intake", { scale: 2, x: -113, y: -94, duration: 0.6, ease: "power2.inOut" }, 13.35);
+      tl.to("#vid-intake", { y: -425, duration: 0.65, ease: "power2.inOut" }, 14.5);
+      tl.to("#vid-intake", { scale: 2.15, x: -96, y: -669, duration: 0.7, ease: "power2.inOut" }, 15.3);
+      pushOut(["#s6", "#laptop-b"], 16.06);
+
+      /* ===== S7: outro ===== */
+      gsap.set("#av-group", { opacity: 0, scale: 0.3, transformOrigin: "50% 50%" });
+      tl.to("#av-group", { opacity: 1, scale: 1, duration: 0.6, ease: "back.out(1.7)" }, 16.42);
+      gsap.set("#av-ring", { rotation: 0, transformOrigin: "50% 50%" });
+      tl.to("#av-ring", { rotation: 220, duration: 2.6, ease: "none" }, 16.4);
+      gsap.set("#glint", { rotation: 35, x: -420 });
+      tl.to("#glint", { x: 420, duration: 0.55, ease: "power2.inOut" }, 16.95);
+      star("#s7-spark", 16.6, 2.4, -90, 40);
+      typeIn("#s7-line", 16.75, 0.035);
+      gsap.set("#s7-url", { opacity: 0, filter: "blur(12px)", y: 14 });
+      tl.to("#s7-url", { opacity: 1, filter: "blur(0px)", y: 0, duration: 0.45, ease: "power3.out" }, 17.257);
+      /* ===== S8: CTA — avatar becomes a profile header, "link in bio", cursor clicks the button on the beat ===== */
+      blurOut(["#s7-line", "#s7-url"], 18.757);
+      tl.to("#av-group", { y: -478, scale: 0.62, duration: 0.6, ease: "power3.inOut" }, 19.057);
+      tl.to("#av-ring", { rotation: 520, duration: 4.15, ease: "none" }, 19.06);
+      tl.to("#s7-spark", { x: -63, y: -424, scale: 0.62, duration: 0.6, ease: "power3.inOut" }, 19.057);
+      tl.to("#s7-spark", { rotation: 260, duration: 4.1, ease: "none" }, 19.06);
+      star("#s8-st-tr", 19.057, 4.2, -4, 12);
+      star("#s8-st-bl", 19.1, 4.2, -4, 12);
+      typeIn("#cta-handle", 19.6, 0.03);
+      typeIn("#cta-setup", 19.4, 0.045);
+      blurIn("#cta-pay", 19.657, 0.3, 0.55);
+      gsap.set("#cta-pay", { transformOrigin: "50% 50%" });
+      gsap.set("#cta-pill", { opacity: 0, y: 40, scale: 0.9, transformOrigin: "50% 50%" });
+      tl.to("#cta-pill", { opacity: 1, y: 0, scale: 1, duration: 0.45, ease: "back.out(1.8)" }, 20.557);
+      gsap.set("#cursor", { opacity: 0, x: 330, y: 470, transformOrigin: "15% 10%" });
+      tl.to("#cursor", { opacity: 1, duration: 0.15 }, 20.857);
+      tl.to("#cursor", { x: 0, y: 0, duration: 0.5, ease: "power2.inOut" }, 20.857);
+      tl.to("#cursor", { scale: 0.85, duration: 0.07, ease: "power2.out" }, 21.44);
+      tl.to("#cursor", { scale: 1, duration: 0.15, ease: "power2.out" }, 21.52);
+      gsap.set("#ripple", { opacity: 0, scale: 0.3, transformOrigin: "50% 50%" });
+      tl.fromTo("#ripple", { opacity: 0.95, scale: 0.3 }, { opacity: 0, scale: 1.8, duration: 0.55, ease: "power2.out", immediateRender: false }, 21.457);
+      tl.to("#cta-pill", { scale: 0.94, duration: 0.07, ease: "power2.out" }, 21.457);
+      tl.to("#cta-pill", { scale: 1, duration: 0.25, ease: "back.out(2.5)" }, 21.53);
+      tl.to("#cta-pill", { backgroundColor: "#fb923c", color: "#0d0d0d", duration: 0.12, ease: "none" }, 21.457);
+      tl.to("#cta-arrow", { color: "#0d0d0d", duration: 0.12, ease: "none" }, 21.457);
+      tl.to("#cta-arrow", { x: 16, duration: 0.18, ease: "power2.out", repeat: 3, yoyo: true }, 21.55);
+      gsap.set("#pill-glint", { rotation: 25, x: -700 });
+      tl.to("#pill-glint", { x: 700, duration: 0.5, ease: "power2.inOut" }, 21.62);
+      tl.to("#cta-pay", { scale: 1.04, duration: 0.08, ease: "power2.out" }, 21.457);
+      tl.to("#cta-pay", { scale: 1, duration: 0.2, ease: "power2.in" }, 21.54);
+      tl.to("#cursor", { x: 120, y: 160, opacity: 0, duration: 0.5, ease: "power2.in" }, 22.1);
+      gsap.set("#up-arrow", { opacity: 0, y: 20 });
+      tl.to("#up-arrow", { opacity: 1, y: 0, duration: 0.3, ease: "power3.out" }, 21.757);
+      tl.to("#up-arrow", { y: -18, duration: 0.28, ease: "sine.inOut", repeat: 3, yoyo: true }, 22.06);
+      tl.to("#end-black", { opacity: 1, duration: 0.25, ease: "power2.in" }, 22.97);
+
+      window.__timelines["brag-editorial-reel"] = tl;
+    </script>
+  </body>
+</html>

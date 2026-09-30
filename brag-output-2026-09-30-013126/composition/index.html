@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=1920, height=1080">
+    <title>ProjectsByAxy // Brag (Cinematic Motion Graphics)</title>
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3.14.2/dist/gsap.min.js"></script>
+    <style>
+      * { box-sizing: border-box; }
+      body {
+        margin: 0;
+        background: #000000;
+        color: #ffffff;
+        font-family: "JetBrains Mono", monospace;
+        overflow: hidden;
+      }
+      #root {
+        position: relative;
+        width: 100%;
+        height: 100%;
+        overflow: hidden;
+        background: #000000;
+      }
+      .clip {
+        position: absolute;
+        inset: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      .display { font-family: "Archivo Black", sans-serif; text-transform: uppercase; }
+      .mono { font-family: "JetBrains Mono", monospace; letter-spacing: 0.25em; text-transform: uppercase; }
+
+      #vignette {
+        position: absolute; inset: 0; z-index: 50; pointer-events: none;
+        background: radial-gradient(circle at 50% 50%, rgba(0,0,0,0) 35%, rgba(0,0,0,0.6) 100%);
+      }
+      #grain {
+        position: absolute; inset: 0; z-index: 51; pointer-events: none; opacity: 0.05;
+        background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+      }
+      #flash-r, #flash-g { position: absolute; inset: 0; z-index: 58; pointer-events: none; mix-blend-mode: screen; opacity: 0; }
+      #flash-r { background: #ff2d2d; }
+      #flash-g { background: #00e5ff; }
+      #flash { position: absolute; inset: 0; z-index: 60; pointer-events: none; background: #ffffff; opacity: 0; }
+
+      #cold-open { display: flex; align-items: center; justify-content: center; position: relative; z-index: 55; }
+      #cold-mark { font-size: 40px; letter-spacing: 0.4em; opacity: 0; }
+      #cold-mark .ax { color: #fb923c; }
+      #cold-mark .slash { color: rgba(255,255,255,0.4); }
+
+      .glow {
+        position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+        width: 1100px; height: 1100px; border-radius: 50%;
+        background: radial-gradient(circle, rgba(251,146,60,0.2) 0%, rgba(251,146,60,0) 70%);
+        pointer-events: none; opacity: 0;
+      }
+
+      /* ---- shard accents: sharp geometric bursts marking scene changes ---- */
+      .shard { position: absolute; opacity: 0; pointer-events: none; z-index: 53; }
+      .shard.orange { background: #fb923c; }
+      .shard.cream { background: #f5f0e8; }
+      .shard-tr { top: -40px; right: 120px; width: 180px; height: 320px; clip-path: polygon(100% 0, 100% 100%, 0 15%); transform: rotate(8deg); }
+      .shard-bl { bottom: -60px; left: 90px; width: 160px; height: 280px; clip-path: polygon(0 100%, 100% 100%, 20% 0); transform: rotate(-6deg); }
+      .shard-tl-sm { top: 60px; left: 60px; width: 70px; height: 130px; clip-path: polygon(0 0, 100% 10%, 20% 100%); }
+      .shard-br-sm { bottom: 60px; right: 60px; width: 70px; height: 130px; clip-path: polygon(100% 0, 100% 100%, 0 90%); }
+
+      /* ---- kinetic two-tier typography ---- */
+      .kinetic-wrap { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: flex-start; justify-content: center; padding-left: 150px; gap: 6px; z-index: 20; }
+      .kinetic-small { font-family: "JetBrains Mono", monospace; letter-spacing: 0.35em; font-size: 26px; color: rgba(255,255,255,0.55); opacity: 0; text-transform: uppercase; }
+      .kinetic-big { font-family: "Archivo Black", sans-serif; font-size: 118px; line-height: 0.94; color: #fb923c; text-transform: uppercase; opacity: 0; letter-spacing: -0.01em; }
+      .kinetic-big.white { color: #ffffff; }
+      .punch-wrap { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; z-index: 20; }
+      .punch-line { font-family: "Archivo Black", sans-serif; font-size: 92px; text-align: center; max-width: 1400px; line-height: 1.05; text-transform: uppercase; opacity: 0; }
+      .punch-line .ax { color: #fb923c; }
+
+      /* ---- device card: real screenshot framed as a UI card, not full-bleed ---- */
+      .device-wrap { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; z-index: 15; }
+      .device-card { position: relative; width: 1240px; opacity: 0; box-shadow: 0 60px 140px rgba(0,0,0,0.85); border: 1px solid rgba(251,146,60,0.4); }
+      .device-titlebar { display: flex; align-items: center; gap: 8px; background: #0a0a0a; padding: 10px 16px; border-bottom: 1px solid rgba(251,146,60,0.3); }
+      .device-dot { width: 9px; height: 9px; border-radius: 50%; background: rgba(255,255,255,0.25); }
+      .device-dot.a { background: #fb923c; }
+      .device-titlebar .url { margin-left: 14px; font-size: 11px; letter-spacing: 0.15em; color: rgb(150,150,150); font-family: "JetBrains Mono", monospace; }
+      .device-card img { width: 100%; display: block; }
+
+      .caption {
+        position: absolute; left: 60px; bottom: 64px; z-index: 55;
+        display: flex; align-items: center; gap: 14px; opacity: 0;
+      }
+      .caption .bar { width: 3px; height: 34px; background: #fb923c; flex-shrink: 0; }
+      .caption .txt { font-size: 20px; font-family: "Archivo Black", sans-serif; text-transform: none; letter-spacing: 0.01em; color: #ffffff; text-shadow: 0 2px 12px rgba(0,0,0,0.8); }
+
+      /* ---- visual metaphor: animated results chart in a dark inset screen ---- */
+      .chart-wrap { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; z-index: 15; }
+      .chart-screen { position: relative; width: 760px; height: 460px; background: #0a0a0a; border: 1px solid rgba(251,146,60,0.35); box-shadow: 0 50px 130px rgba(0,0,0,0.8); opacity: 0; padding: 30px 34px; }
+      .chart-label { font-family: "JetBrains Mono", monospace; font-size: 13px; letter-spacing: 0.25em; color: rgba(255,255,255,0.4); text-transform: uppercase; margin-bottom: 6px; }
+      .chart-big-num { font-family: "Archivo Black", sans-serif; font-size: 46px; color: #fb923c; margin-bottom: 16px; }
+      .chart-dot { opacity: 0; }
+
+      /* real-footage still image, full-bleed, used only for hero video overlay pairing */
+      .shot { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: top center; opacity: 0; }
+
+      #scene-hero .stack { display: flex; flex-direction: column; align-items: flex-start; gap: 14px; position: relative; z-index: 1; padding-left: 90px; }
+      #wordmark { font-size: 92px; letter-spacing: 0.02em; opacity: 0; }
+      #wordmark-sub { font-size: 28px; letter-spacing: 0.3em; color: rgba(255,255,255,0.7); opacity: 0; }
+
+      #outro-group { display: flex; flex-direction: column; align-items: center; gap: 20px; opacity: 0; position: relative; z-index: 20; }
+      #outro-logo { font-size: 104px; letter-spacing: 0.02em; }
+      #outro-tag { font-size: 26px; letter-spacing: 0.1em; color: rgba(255,255,255,0.9); opacity: 0; }
+    </style>
+  </head>
+  <body>
+    <div id="root" data-composition-id="brag-cinematic-motion" data-start="0" data-width="1920" data-height="1080" data-duration="24.157">
+
+      <!-- ============ SCENE 1: COLD OPEN (0-1.357s) ============ -->
+      <section id="scene-cold" class="clip" data-start="0" data-duration="1.357" data-track-index="0">
+        <div id="cold-open">
+          <div id="cold-mark" class="mono"><span class="ax">AX</span> <span class="slash">//</span> <span>PBA</span></div>
+        </div>
+      </section>
+
+      <!-- ============ SCENE 2: HOOK — KINETIC TYPE (1.357-4.957s) ============ -->
+      <section id="scene-hook" class="clip" data-start="1.357" data-duration="3.6" data-track-index="0">
+        <div class="kinetic-wrap">
+          <div class="kinetic-small mono" id="hook-small">We Don't Build</div>
+          <div class="kinetic-big" id="hook-big">Websites.</div>
+        </div>
+        <div class="shard orange shard-tr" id="shard-hook-1"></div>
+        <div class="shard cream shard-bl" id="shard-hook-2"></div>
+      </section>
+
+      <!-- ============ SCENE 3: THE DROP — REAL HERO VIDEO (4.957-7.357s) ============ -->
+      <video id="hero-video" src="assets/video/hero.mp4" muted playsinline data-start="4.957" data-duration="2.4" data-track-index="1" style="position:absolute; inset:0; width:100%; height:100%; object-fit:cover; opacity:0;"></video>
+      <div id="hero-video-overlay" class="clip" data-start="4.957" data-duration="2.4" data-track-index="1" style="position:absolute; inset:0; background:rgba(0,0,0,0.5); opacity:0;"></div>
+
+      <section id="scene-hero" class="clip" data-start="4.957" data-duration="2.4" data-track-index="0">
+        <div class="glow" id="glow-hero"></div>
+        <div class="stack">
+          <div id="wordmark" class="display">ProjectsByAxy</div>
+          <div id="wordmark-sub" class="mono">// AI Solutions</div>
+        </div>
+        <div class="shard orange shard-tl-sm" id="shard-hero"></div>
+      </section>
+
+      <!-- ============ SCENE 4: VISUAL METAPHOR — RESULTS CHART (7.357-9.457s) ============ -->
+      <section id="scene-chart" class="clip" data-start="7.357" data-duration="2.1" data-track-index="0">
+        <div class="chart-wrap">
+          <div class="chart-screen" id="chart-screen">
+            <div class="chart-label mono">Real Outcomes</div>
+            <div class="chart-big-num" id="chart-num">+43%</div>
+            <svg width="692" height="240" viewBox="0 0 692 240">
+              <polyline id="chart-line" points="0,190 110,160 220,175 330,110 440,95 550,45 692,20"
+                fill="none" stroke="#fb923c" stroke-width="3" stroke-linecap="round"
+                style="stroke-dasharray: 900; stroke-dashoffset: 900;" />
+              <circle class="chart-dot" id="dot-1" cx="8" cy="190" r="6" fill="#fb923c" />
+              <circle class="chart-dot" id="dot-2" cx="220" cy="175" r="6" fill="#fb923c" />
+              <circle class="chart-dot" id="dot-3" cx="440" cy="95" r="6" fill="#fb923c" />
+              <circle class="chart-dot" id="dot-4" cx="684" cy="20" r="8" fill="#fb923c" />
+            </svg>
+          </div>
+        </div>
+        <div class="caption" id="cap-chart"><span class="bar"></span><span class="txt mono">Not Vanity Metrics.</span></div>
+        <div class="shard orange shard-br-sm" id="shard-chart"></div>
+      </section>
+
+      <!-- ============ SCENE 5: SERVICES — DEVICE CARD (9.457-11.557s) ============ -->
+      <section id="scene-services" class="clip" data-start="9.457" data-duration="2.1" data-track-index="0">
+        <div class="device-wrap">
+          <div class="device-card" id="card-services">
+            <div class="device-titlebar"><span class="device-dot a"></span><span class="device-dot"></span><span class="device-dot"></span><span class="url">projectsbyaxy.com/#services</span></div>
+            <img src="assets/shots/02-services.png" alt="">
+          </div>
+        </div>
+        <div class="caption" id="cap-services"><span class="bar"></span><span class="txt mono">6 Services. 1 Team.</span></div>
+        <div class="shard orange shard-tr" id="shard-services"></div>
+      </section>
+
+      <!-- ============ SCENE 6: PROCESS — DEVICE CARD (11.557-13.657s) ============ -->
+      <section id="scene-process" class="clip" data-start="11.557" data-duration="2.1" data-track-index="0">
+        <div class="device-wrap">
+          <div class="device-card" id="card-process">
+            <div class="device-titlebar"><span class="device-dot a"></span><span class="device-dot"></span><span class="device-dot"></span><span class="url">projectsbyaxy.com/#process</span></div>
+            <img src="assets/shots/04-process.png" alt="">
+          </div>
+        </div>
+        <div class="caption" id="cap-process"><span class="bar"></span><span class="txt mono">4-Phase Pipeline.</span></div>
+        <div class="shard cream shard-bl" id="shard-process"></div>
+      </section>
+
+      <!-- ============ SCENE 7: PROJECTS — DEVICE CARD (13.657-16.057s) ============ -->
+      <section id="scene-projects" class="clip" data-start="13.657" data-duration="2.4" data-track-index="0">
+        <div class="device-wrap">
+          <div class="device-card" id="card-projects">
+            <div class="device-titlebar"><span class="device-dot a"></span><span class="device-dot"></span><span class="device-dot"></span><span class="url">projectsbyaxy.com/#work</span></div>
+            <img src="assets/shots/05-projects.png" alt="">
+          </div>
+        </div>
+        <div class="caption" id="cap-projects"><span class="bar"></span><span class="txt mono">Shipped &amp; Deployed.</span></div>
+        <div class="shard orange shard-tl-sm" id="shard-projects"></div>
+      </section>
+
+      <!-- ============ SCENE 8: PUNCHLINE — KINETIC TYPE (16.057-17.857s) ============ -->
+      <section id="scene-punch" class="clip" data-start="16.057" data-duration="1.8" data-track-index="0">
+        <div class="punch-wrap">
+          <div class="punch-line display" id="punch-line">This Isn't <span class="ax">A Template.</span></div>
+        </div>
+        <div class="shard orange shard-tr" id="shard-punch-1"></div>
+        <div class="shard cream shard-bl" id="shard-punch-2"></div>
+      </section>
+
+      <!-- ============ SCENE 9: INTAKE TERMINAL — REAL FILL-UP, REUSED VERBATIM (17.857-21.457s) ============ -->
+      <section id="scene-terminal" class="clip" data-start="17.857" data-duration="3.6" data-track-index="0">
+        <img class="shot" id="shot-t1" src="assets/shots/08-terminal-empty.png" alt="">
+        <img class="shot" id="shot-t2" src="assets/shots/09-terminal-name.png" alt="">
+        <img class="shot" id="shot-t3" src="assets/shots/10-terminal-email.png" alt="">
+        <img class="shot" id="shot-t4" src="assets/shots/11-terminal-tags.png" alt="">
+        <img class="shot" id="shot-t5" src="assets/shots/12-terminal-brief.png" alt="">
+        <img class="shot" id="shot-t6" src="assets/shots/13-terminal-ready.png" alt="">
+        <img class="shot" id="shot-t7" src="assets/shots/14-terminal-success.png" alt="">
+        <div class="caption" id="cap-terminal-fill"><span class="bar"></span><span class="txt mono">Submit In Seconds.</span></div>
+        <div class="caption" id="cap-terminal-success"><span class="bar"></span><span class="txt mono">Request Transmitted.</span></div>
+      </section>
+
+      <!-- ============ SCENE 10: OUTRO (21.457-24.157s) ============ -->
+      <section id="scene-outro" class="clip" data-start="21.457" data-duration="2.7" data-track-index="0">
+        <div id="outro-group">
+          <div id="outro-logo" class="display">ProjectsByAxy</div>
+          <div id="outro-tag" class="display">Shift your reality.</div>
+        </div>
+        <div class="shard orange shard-tl-sm" id="shard-outro-1"></div>
+        <div class="shard cream shard-br-sm" id="shard-outro-2"></div>
+      </section>
+
+      <!-- ============ ALWAYS-ON GRIT/TRANSITION LAYERS ============ -->
+      <div id="vignette" class="clip" data-start="0" data-duration="24.157" data-track-index="0"></div>
+      <div id="grain" class="clip" data-start="0" data-duration="24.157" data-track-index="0"></div>
+      <div id="flash-r" class="clip" data-start="0" data-duration="24.157" data-track-index="0"></div>
+      <div id="flash-g" class="clip" data-start="0" data-duration="24.157" data-track-index="0"></div>
+      <div id="flash" class="clip" data-start="0" data-duration="24.157" data-track-index="0"></div>
+
+      <!-- ============ AUDIO ============ -->
+      <audio id="music" src="assets/music/akxneshiva.mp3" data-start="0" data-duration="24.157" data-track-index="20" data-automation="{&quot;version&quot;:1,&quot;lanes&quot;:[{&quot;target&quot;:&quot;volume&quot;,&quot;points&quot;:[{&quot;t&quot;:0,&quot;v&quot;:0.75},{&quot;t&quot;:4.8,&quot;v&quot;:0.75},{&quot;t&quot;:4.957,&quot;v&quot;:0.9},{&quot;t&quot;:23.8,&quot;v&quot;:0.9},{&quot;t&quot;:24.157,&quot;v&quot;:0}]}]}"></audio>
+
+      <audio id="sfx-cold" src="assets/sfx/glitch_002.ogg" data-start="0.05" data-duration="0.03" data-volume="0.5" data-track-index="21"></audio>
+      <audio id="sfx-hook" src="assets/sfx/error_005.ogg" data-start="1.357" data-duration="0.2" data-volume="0.35" data-track-index="21"></audio>
+      <audio id="sfx-drop" src="assets/sfx/impactSoft_heavy_000.ogg" data-start="4.957" data-duration="0.55" data-volume="0.6" data-track-index="21"></audio>
+      <audio id="sfx-punch" src="assets/sfx/impactSoft_heavy_003.ogg" data-start="16.057" data-duration="0.3" data-volume="0.5" data-track-index="21"></audio>
+      <audio id="sfx-key-1" src="assets/sfx/keypress-001.wav" data-start="18.16" data-duration="0.15" data-volume="0.3" data-track-index="21"></audio>
+      <audio id="sfx-key-2" src="assets/sfx/keypress-002.wav" data-start="18.46" data-duration="0.15" data-volume="0.3" data-track-index="22"></audio>
+      <audio id="sfx-press" src="assets/sfx/impactSoft_heavy_003.ogg" data-start="19.357" data-duration="0.3" data-volume="0.5" data-track-index="23"></audio>
+      <audio id="sfx-success" src="assets/sfx/impactBell_heavy_000.ogg" data-start="19.657" data-duration="0.8" data-volume="0.55" data-track-index="24"></audio>
+      <audio id="sfx-outro" src="assets/sfx/impactBell_heavy_004.ogg" data-start="21.457" data-duration="0.3" data-volume="0.55" data-track-index="21"></audio>
+    </div>
+
+    <script>
+      var tl = gsap.timeline({ paused: true });
+
+      function bigHit(t) {
+        tl.set("#flash", { opacity: 0.9 }, t);
+        tl.to("#flash", { opacity: 0, duration: 0.07, ease: "power2.out" }, t + 0.01);
+        tl.set("#flash-r", { opacity: 0.5 }, t);
+        tl.set("#flash-g", { opacity: 0.5 }, t + 0.012);
+        tl.to("#flash-r", { opacity: 0, duration: 0.09 }, t + 0.02);
+        tl.to("#flash-g", { opacity: 0, duration: 0.09 }, t + 0.03);
+        tl.set("#root", { x: -14 }, t);
+        tl.to("#root", { x: 10, duration: 0.03, ease: "none" }, t + 0.035);
+        tl.to("#root", { x: -5, duration: 0.03, ease: "none" }, t + 0.072);
+        tl.to("#root", { x: 0, duration: 0.03, ease: "none" }, t + 0.109);
+      }
+      function softCut(t) {
+        tl.set("#flash", { opacity: 0.3 }, t);
+        tl.to("#flash", { opacity: 0, duration: 0.05, ease: "power2.out" }, t + 0.008);
+        tl.set("#flash-r", { opacity: 0.2 }, t);
+        tl.to("#flash-r", { opacity: 0, duration: 0.06 }, t + 0.015);
+      }
+      function showShot(sel, t) {
+        tl.fromTo(sel, { opacity: 0 }, { opacity: 1, duration: 0.12, ease: "power2.out" }, t);
+      }
+      function hideShot(sel, t) { tl.to(sel, { opacity: 0, duration: 0.06 }, t); }
+      function cutShot(sel, t) { tl.set(sel, { opacity: 1 }, t); }
+      function cutHideShot(sel, t) { tl.set(sel, { opacity: 0 }, t); }
+      function pulse(sel, t) {
+        tl.to(sel, { scale: 1.045, duration: 0.07, ease: "power2.out" }, t)
+          .to(sel, { scale: 1, duration: 0.09, ease: "power2.in" }, t + 0.07);
+      }
+      function shardIn(sel, t) {
+        tl.fromTo(sel, { opacity: 0, scale: 0.7 }, { opacity: 0.9, scale: 1, duration: 0.16, ease: "power3.out" }, t);
+      }
+      function shardOut(sel, t) {
+        tl.to(sel, { opacity: 0, duration: 0.1, ease: "power2.in" }, t);
+      }
+
+      /* ===================== SCENE 1: COLD OPEN (0-1.357s) ===================== */
+      bigHit(0.05);
+      tl.set("#cold-mark", { opacity: 1 }, 0.05);
+      tl.to("#cold-mark", { opacity: 0.15, duration: 0.03 }, 0.12);
+      tl.to("#cold-mark", { opacity: 1, duration: 0.03 }, 0.16);
+      tl.to("#cold-mark", { opacity: 0.2, duration: 0.03 }, 0.32);
+      tl.to("#cold-mark", { opacity: 1, duration: 0.03 }, 0.38);
+      tl.to("#cold-mark", { opacity: 1, duration: 0.1 }, 0.6);
+
+      /* ===================== SCENE 2: HOOK — KINETIC TYPE (1.357-4.957s) ===================== */
+      bigHit(1.357);
+      shardIn("#shard-hook-1", 1.357);
+      shardIn("#shard-hook-2", 1.42);
+      tl.fromTo("#hook-small", { opacity: 0, y: 10 }, { opacity: 1, y: 0, duration: 0.15, ease: "power3.out" }, 1.42);
+      tl.fromTo("#hook-big", { opacity: 0, scale: 1.1, y: 20 }, { opacity: 1, scale: 1, y: 0, duration: 0.18, ease: "expo.out" }, 1.6);
+      pulse("#hook-big", 2.557);
+      pulse("#hook-big", 3.457);
+      shardOut("#shard-hook-1", 4.8);
+      shardOut("#shard-hook-2", 4.8);
+      tl.to("#hook-small", { opacity: 0, duration: 0.06 }, 4.9);
+      tl.to("#hook-big", { opacity: 0, duration: 0.06 }, 4.9);
+
+      /* ===================== SCENE 3: THE DROP — REAL HERO VIDEO (4.957-7.357s) ===================== */
+      bigHit(4.957);
+      tl.fromTo("#hero-video", { opacity: 0 }, { opacity: 0.75, duration: 0.15, ease: "power2.out" }, 4.957);
+      tl.fromTo("#hero-video-overlay", { opacity: 0 }, { opacity: 1, duration: 0.15, ease: "power2.out" }, 4.957);
+      tl.fromTo("#glow-hero", { opacity: 0 }, { opacity: 1, duration: 0.2, ease: "power2.out" }, 4.967);
+      tl.fromTo("#wordmark", { opacity: 0, scale: 1.15 }, { opacity: 1, scale: 1, duration: 0.14, ease: "expo.out" }, 5.0);
+      tl.fromTo("#wordmark-sub", { opacity: 0, y: 10 }, { opacity: 1, y: 0, duration: 0.15, ease: "power3.out" }, 5.15);
+      shardIn("#shard-hero", 5.0);
+      pulse("#wordmark", 5.557);
+      pulse("#wordmark", 6.157);
+      shardOut("#shard-hero", 7.2);
+
+      /* ===================== SCENE 4: VISUAL METAPHOR — RESULTS CHART (7.357-9.457s) ===================== */
+      softCut(7.357);
+      tl.fromTo("#chart-screen", { opacity: 0, y: 16 }, { opacity: 1, y: 0, duration: 0.16, ease: "power3.out" }, 7.357);
+      tl.to("#chart-line", { strokeDashoffset: 0, duration: 0.9, ease: "power2.out" }, 7.45);
+      tl.fromTo("#dot-1", { opacity: 0, scale: 0.4 }, { opacity: 1, scale: 1, duration: 0.1 }, 7.5);
+      tl.fromTo("#dot-2", { opacity: 0, scale: 0.4 }, { opacity: 1, scale: 1, duration: 0.1 }, 7.75);
+      tl.fromTo("#dot-3", { opacity: 0, scale: 0.4 }, { opacity: 1, scale: 1, duration: 0.1 }, 8.05);
+      tl.fromTo("#dot-4", { opacity: 0, scale: 0.4 }, { opacity: 1, scale: 1.2, duration: 0.12, ease: "back.out(2)" }, 8.35)
+        .to("#dot-4", { scale: 1, duration: 0.08 }, 8.47);
+      tl.fromTo("#chart-num", { opacity: 0, y: 8 }, { opacity: 1, y: 0, duration: 0.14, ease: "power3.out" }, 7.55);
+      shardIn("#shard-chart", 7.4);
+      tl.fromTo("#cap-chart", { opacity: 0, x: -10 }, { opacity: 1, x: 0, duration: 0.15, ease: "power3.out" }, 7.5);
+
+      /* ===================== SCENE 5: SERVICES — DEVICE CARD (9.457-11.557s) ===================== */
+      softCut(9.457);
+      tl.fromTo("#card-services", { opacity: 0, y: 16 }, { opacity: 1, y: 0, duration: 0.16, ease: "power3.out" }, 9.457);
+      shardIn("#shard-services", 9.5);
+      tl.fromTo("#cap-services", { opacity: 0, x: -10 }, { opacity: 1, x: 0, duration: 0.15, ease: "power3.out" }, 9.55);
+
+      /* ===================== SCENE 6: PROCESS — DEVICE CARD (11.557-13.657s) ===================== */
+      softCut(11.557);
+      tl.fromTo("#card-process", { opacity: 0, y: 16 }, { opacity: 1, y: 0, duration: 0.16, ease: "power3.out" }, 11.557);
+      shardIn("#shard-process", 11.6);
+      tl.fromTo("#cap-process", { opacity: 0, x: -10 }, { opacity: 1, x: 0, duration: 0.15, ease: "power3.out" }, 11.65);
+
+      /* ===================== SCENE 7: PROJECTS — DEVICE CARD (13.657-16.057s) ===================== */
+      softCut(13.657);
+      tl.fromTo("#card-projects", { opacity: 0, y: 16 }, { opacity: 1, y: 0, duration: 0.16, ease: "power3.out" }, 13.657);
+      shardIn("#shard-projects", 13.7);
+      tl.fromTo("#cap-projects", { opacity: 0, x: -10 }, { opacity: 1, x: 0, duration: 0.15, ease: "power3.out" }, 13.75);
+
+      /* ===================== SCENE 8: PUNCHLINE — KINETIC TYPE (16.057-17.857s) ===================== */
+      bigHit(16.057);
+      shardIn("#shard-punch-1", 16.057);
+      shardIn("#shard-punch-2", 16.12);
+      tl.fromTo("#punch-line", { opacity: 0, scale: 1.08 }, { opacity: 1, scale: 1, duration: 0.16, ease: "expo.out" }, 16.12);
+      pulse("#punch-line", 17.057);
+      shardOut("#shard-punch-1", 17.7);
+      shardOut("#shard-punch-2", 17.7);
+
+      /* ===================== SCENE 9: INTAKE TERMINAL — REAL FILL-UP, REUSED VERBATIM (17.857-21.457s) ===================== */
+      /* Zero effects anywhere in this scene — instant swaps only, so the form stays fully readable. */
+      cutShot("#shot-t1", 17.857);
+      tl.set("#cap-terminal-fill", { opacity: 1 }, 17.92);
+
+      cutHideShot("#shot-t1", 18.157);
+      cutShot("#shot-t2", 18.157);
+
+      cutHideShot("#shot-t2", 18.457);
+      cutShot("#shot-t3", 18.457);
+
+      cutHideShot("#shot-t3", 18.757);
+      cutShot("#shot-t4", 18.757);
+
+      cutHideShot("#shot-t4", 19.057);
+      cutShot("#shot-t5", 19.057);
+
+      cutHideShot("#shot-t5", 19.357);
+      cutShot("#shot-t6", 19.357);
+
+      cutHideShot("#shot-t6", 19.657);
+      tl.set("#cap-terminal-fill", { opacity: 0 }, 19.657);
+      cutShot("#shot-t7", 19.657);
+      tl.set("#cap-terminal-success", { opacity: 1 }, 19.76);
+
+      /* ===================== SCENE 10: OUTRO (21.457-24.157s) ===================== */
+      bigHit(21.457);
+      shardIn("#shard-outro-1", 21.457);
+      shardIn("#shard-outro-2", 21.52);
+      tl.fromTo("#outro-group", { opacity: 0 }, { opacity: 1, duration: 0.01 }, 21.467);
+      tl.fromTo("#outro-logo", { opacity: 0, scale: 1.18 }, { opacity: 1, scale: 1, duration: 0.14, ease: "expo.out" }, 21.477);
+      tl.fromTo("#outro-tag", { opacity: 0, y: 10 }, { opacity: 1, y: 0, duration: 0.15, ease: "power3.out" }, 21.7);
+      tl.to("#outro-logo", { scale: 1.045, duration: 0.07, ease: "power2.out" }, 22.657)
+        .to("#outro-logo", { scale: 1, duration: 0.09, ease: "power2.in" }, 22.727);
+      bigHit(24.157);
+
+      window.__timelines["brag-cinematic-motion"] = tl;
+    </script>
+  </body>
+</html>

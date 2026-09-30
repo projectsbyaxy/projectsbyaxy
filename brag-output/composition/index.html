@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=1920, height=1080">
+    <title>ProjectsByAxy // Brag</title>
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3.14.2/dist/gsap.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3.14.2/dist/TextPlugin.min.js"></script>
+    <style>
+      * { box-sizing: border-box; }
+      body {
+        margin: 0;
+        background: #000000;
+        color: #ffffff;
+        font-family: "JetBrains Mono", monospace;
+        overflow: hidden;
+      }
+      #root {
+        position: relative;
+        width: 100%;
+        height: 100%;
+        overflow: hidden;
+        background: #000000;
+      }
+      .clip {
+        position: absolute;
+        inset: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      .mono {
+        font-family: "JetBrains Mono", monospace;
+        letter-spacing: 0.25em;
+        text-transform: uppercase;
+      }
+      .display {
+        font-family: "Archivo Black", sans-serif;
+        text-transform: uppercase;
+      }
+      .accent { color: #fb923c; }
+      .dim40 { color: rgba(255,255,255,0.4); }
+      .dim25 { color: rgba(255,255,255,0.25); }
+      .dim55 { color: rgba(255,255,255,0.55); }
+
+      /* ---------- shared glow ---------- */
+      .glow {
+        position: absolute;
+        width: 900px;
+        height: 900px;
+        border-radius: 50%;
+        background: radial-gradient(circle, rgba(251,146,60,0.18) 0%, rgba(251,146,60,0) 70%);
+        pointer-events: none;
+      }
+
+      /* ---------- scene 1: hook ---------- */
+      #scanline {
+        position: absolute;
+        top: 50%;
+        left: -10%;
+        width: 120%;
+        height: 2px;
+        background: linear-gradient(90deg, transparent, rgba(251,146,60,0.9), transparent);
+        opacity: 0;
+      }
+      #scene-hook .stack {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 28px;
+      }
+      #logo-line { display: flex; align-items: baseline; gap: 2px; }
+      #logo-type {
+        font-size: 34px;
+        letter-spacing: 0.35em;
+        color: #fb923c;
+        white-space: pre;
+      }
+      #logo-cursor {
+        width: 14px;
+        height: 30px;
+        background: #fb923c;
+        margin-left: 6px;
+        display: inline-block;
+      }
+      .headline-wrap { display: flex; flex-direction: column; align-items: center; gap: 4px; }
+      .headline-line {
+        font-size: 78px;
+        line-height: 1.05;
+        opacity: 0;
+      }
+
+      /* ---------- scene 2: specs ---------- */
+      #scene-specs .stack { display: flex; flex-direction: column; align-items: center; gap: 46px; width: 100%; }
+      #tagline { font-size: 24px; letter-spacing: 0.15em; text-transform: none; font-family: "JetBrains Mono", monospace; color: rgba(255,255,255,0.7); opacity: 0; max-width: 900px; text-align: center; }
+      .spec-rows { display: flex; flex-direction: column; width: 1100px; border-top: 1px solid rgba(255,255,255,0.12); }
+      .spec-row { display: flex; justify-content: space-between; padding: 20px 4px; border-bottom: 1px solid rgba(255,255,255,0.08); opacity: 0; }
+      .spec-row .k { font-size: 15px; letter-spacing: 0.25em; color: rgba(255,255,255,0.55); }
+      .spec-row .v { font-size: 17px; letter-spacing: 0.08em; color: #ffffff; max-width: 640px; text-align: right; }
+
+      /* ---------- scene 3: service matrix ---------- */
+      #scene-services .stack { display: flex; flex-direction: column; align-items: center; gap: 40px; width: 100%; }
+      #svc-kicker { font-size: 16px; letter-spacing: 0.35em; color: #fb923c; opacity: 0; }
+      .svc-rows { display: flex; flex-direction: column; width: 1150px; }
+      .svc-row { display: flex; align-items: center; gap: 28px; padding: 22px 8px; border-bottom: 1px solid rgba(255,255,255,0.07); opacity: 0; }
+      .svc-row .idx { font-size: 16px; color: rgba(255,255,255,0.55); width: 40px; }
+      .svc-row .dot { width: 10px; height: 10px; border-radius: 50%; background: #fb923c; flex-shrink: 0; }
+      .svc-row .title { font-size: 30px; letter-spacing: 0.08em; color: #ffffff; font-family: "Archivo Black", sans-serif; text-transform: uppercase; }
+
+      /* ---------- scene 4: intake terminal ---------- */
+      #scene-terminal .term-card {
+        width: 980px;
+        border: 1px solid rgba(255,255,255,0.12);
+        background: rgba(255,255,255,0.02);
+        padding: 44px 48px;
+        display: flex;
+        flex-direction: column;
+        gap: 26px;
+      }
+      #term-kicker { font-size: 15px; letter-spacing: 0.35em; color: #fb923c; opacity: 0; }
+      .field { display: flex; flex-direction: column; gap: 10px; opacity: 0; }
+      .field .flabel { font-size: 13px; letter-spacing: 0.3em; color: rgba(255,255,255,0.55); }
+      .field .fbox { border: 1px solid rgba(255,255,255,0.15); background: rgba(255,255,255,0.03); padding: 16px 18px; font-size: 20px; letter-spacing: 0.04em; text-transform: none; font-family: "JetBrains Mono", monospace; min-height: 26px; }
+      .tags-row { display: flex; gap: 16px; opacity: 0; }
+      .tag { display: flex; align-items: center; gap: 12px; border: 1px solid rgba(255,255,255,0.12); padding: 14px 20px; }
+      .tag .box { width: 18px; height: 18px; border: 1px solid rgba(255,255,255,0.25); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+      .tag .box .fill { width: 100%; height: 100%; background: #fb923c; }
+      .tag .label { font-size: 14px; letter-spacing: 0.15em; color: rgba(255,255,255,0.55); }
+      .pkg-badge { display: flex; align-items: center; justify-content: space-between; border: 1px solid rgba(251,146,60,0.3); padding: 16px 20px; opacity: 0; }
+      .pkg-badge .name { color: #fb923c; font-size: 18px; letter-spacing: 0.15em; }
+      .pkg-badge .locked { font-size: 12px; letter-spacing: 0.2em; color: rgba(255,255,255,0.55); }
+      #transmit-btn { position: relative; width: 100%; background: #ffffff; color: #000000; padding: 22px 0; text-align: center; font-size: 16px; letter-spacing: 0.35em; font-weight: 700; display: flex; align-items: center; justify-content: center; gap: 16px; opacity: 0; }
+      #btn-label { white-space: pre; }
+      #spinner {
+        width: 20px;
+        height: 20px;
+        border: 3px solid rgba(0,0,0,0.25);
+        border-top-color: #000000;
+        border-radius: 50%;
+        opacity: 0;
+      }
+
+      /* ---------- scene 5: outro ---------- */
+      #scene-outro .stack { display: flex; flex-direction: column; align-items: center; gap: 26px; }
+      #check-circle { width: 110px; height: 110px; border-radius: 50%; border: 1px solid rgba(255,255,255,0.25); display: flex; align-items: center; justify-content: center; opacity: 0; }
+      #check-circle svg { width: 46px; height: 46px; }
+      #success-title { font-size: 46px; letter-spacing: 0.1em; opacity: 0; font-family: "Archivo Black", sans-serif; text-transform: uppercase; }
+      #success-sub { font-size: 15px; letter-spacing: 0.2em; color: rgba(255,255,255,0.4); opacity: 0; }
+      #logo-card { display: flex; flex-direction: column; align-items: center; gap: 18px; opacity: 0; }
+      #logo-mark { font-size: 44px; letter-spacing: 0.3em; }
+      #logo-mark .ax { color: #fb923c; }
+      #logo-mark .slash { color: rgba(255,255,255,0.42); }
+      #logo-url { font-size: 18px; letter-spacing: 0.2em; color: rgba(255,255,255,0.5); }
+      #logo-tag { font-size: 22px; letter-spacing: 0.08em; color: #ffffff; font-family: "Archivo Black", sans-serif; text-transform: uppercase; }
+    </style>
+  </head>
+  <body>
+    <div data-hf-id="hf-k0ad" id="root" data-composition-id="brag" data-start="0" data-width="1920" data-height="1080" data-duration="19">
+      <!-- ============ SCENE 1: HOOK (0-3s) ============ -->
+      <section data-hf-id="hf-e3nb" id="scene-hook" class="clip" data-start="0" data-duration="3" data-track-index="0">
+        <div data-hf-id="hf-ji1u" class="glow" id="glow-1" style="top: 30%; left: 50%; transform: translate(-50%,-50%);"></div>
+        <div data-hf-id="hf-orgk" id="scanline"></div>
+        <div data-hf-id="hf-d1zs" class="stack">
+          <div data-hf-id="hf-6izr" id="logo-line">
+            <span data-hf-id="hf-9k00" id="logo-type" class="mono"></span><span data-hf-id="hf-re0u" id="logo-cursor"></span>
+          </div>
+          <div data-hf-id="hf-f5ph" class="headline-wrap">
+            <div data-hf-id="hf-0h3u" id="hl-1" class="headline-line display dim40">PROJECTSBYAXY //</div>
+            <div data-hf-id="hf-pc8o" id="hl-2" class="headline-line display">AI SOLUTIONS</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ SCENE 2: TECH SPECS (3-6s) ============ -->
+      <section data-hf-id="hf-dhr1" id="scene-specs" class="clip" data-start="3" data-duration="3" data-track-index="0">
+        <div data-hf-id="hf-g2wg" class="stack">
+          <div data-hf-id="hf-5r8g" id="tagline">Shift your reality.</div>
+          <div data-hf-id="hf-sdwl" class="spec-rows">
+            <div data-hf-id="hf-t58b" class="spec-row" id="spec-1"><span data-hf-id="hf-m2oj" class="k">Agency</span><span data-hf-id="hf-ugxe" class="v">ProjectsByAxy Solutions</span></div>
+            <div data-hf-id="hf-khcg" class="spec-row" id="spec-2"><span data-hf-id="hf-zj96" class="k">Logic</span><span data-hf-id="hf-ydnr" class="v">Advanced AI Solutions</span></div>
+            <div data-hf-id="hf-l909" class="spec-row" id="spec-3"><span data-hf-id="hf-c9rg" class="k">Flow</span><span data-hf-id="hf-d17x" class="v">High-Velocity Delivery</span></div>
+            <div data-hf-id="hf-adim" class="spec-row" id="spec-4"><span data-hf-id="hf-wfr0" class="k">Stack</span><span data-hf-id="hf-eycc" class="v">Claude AI, ChatGPT, SaaS, Full Stack, Cloud Ops</span></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ SCENE 3: SERVICE MATRIX (6-10s) ============ -->
+      <section data-hf-id="hf-mdz3" id="scene-services" class="clip" data-start="6" data-duration="4" data-track-index="0">
+        <div data-hf-id="hf-evzd" class="stack">
+          <div data-hf-id="hf-0wrf" id="svc-kicker" class="mono">Service Matrix //</div>
+          <div data-hf-id="hf-ghlk" class="svc-rows">
+            <div data-hf-id="hf-qnrh" class="svc-row" id="svc-1"><span data-hf-id="hf-fjzw" class="idx mono">01</span><span data-hf-id="hf-9gry" class="dot"></span><span data-hf-id="hf-k52g" class="title">Brand Identity</span></div>
+            <div data-hf-id="hf-ulvi" class="svc-row" id="svc-2"><span data-hf-id="hf-ed2t" class="idx mono">02</span><span data-hf-id="hf-zcc2" class="dot"></span><span data-hf-id="hf-lw2w" class="title">Web Development</span></div>
+            <div data-hf-id="hf-0rlb" class="svc-row" id="svc-3"><span data-hf-id="hf-erdu" class="idx mono">03</span><span data-hf-id="hf-zqn3" class="dot"></span><span data-hf-id="hf-q14v" class="title">AI Content Creation</span></div>
+            <div data-hf-id="hf-4ppc" class="svc-row" id="svc-4"><span data-hf-id="hf-gqwz" class="idx mono">04</span><span data-hf-id="hf-04y4" class="dot"></span><span data-hf-id="hf-mp33" class="title">Video &amp; Reels</span></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ SCENE 4: INTAKE TERMINAL (10-16s) ============ -->
+      <section data-hf-id="hf-2kru" id="scene-terminal" class="clip" data-start="10" data-duration="6" data-track-index="0">
+        <div data-hf-id="hf-m5el" class="glow" id="glow-2" style="top: 50%; left: 85%; transform: translate(-50%,-50%);"></div>
+        <div data-hf-id="hf-bulp" class="term-card">
+          <div data-hf-id="hf-ovs6" id="term-kicker" class="mono" style="color:#fb923c;">Submit Intake Request</div>
+
+          <div data-hf-id="hf-g7ei" class="field" id="field-name">
+            <div data-hf-id="hf-pie2" class="flabel mono">Operator Name *</div>
+            <div data-hf-id="hf-nxdx" class="fbox"><span data-hf-id="hf-2q7g" id="name-type"></span></div>
+          </div>
+
+          <div data-hf-id="hf-wqh1" class="field" id="field-email">
+            <div data-hf-id="hf-vz01" class="flabel mono">Email Address *</div>
+            <div data-hf-id="hf-revt" class="fbox"><span data-hf-id="hf-1wcj" id="email-type"></span></div>
+          </div>
+
+          <div data-hf-id="hf-m3hm" class="tags-row" id="tags-row">
+            <div data-hf-id="hf-og20" class="tag"><span data-hf-id="hf-2l5s" class="box"><span data-hf-id="hf-ywbk" class="fill" id="tag-fill-1"></span></span><span data-hf-id="hf-237l" class="label mono">Web Development</span></div>
+            <div data-hf-id="hf-oqm8" class="tag"><span data-hf-id="hf-qahk" class="box"><span data-hf-id="hf-7k7f" class="fill" id="tag-fill-2"></span></span><span data-hf-id="hf-q5a2" class="label mono">AI Content Creation</span></div>
+          </div>
+
+          <div data-hf-id="hf-89qy" class="pkg-badge" id="pkg-badge">
+            <span data-hf-id="hf-36k8" class="name mono">Domination — ₹74,999</span>
+            <span data-hf-id="hf-ine2" class="locked mono">Locked</span>
+          </div>
+
+          <div data-hf-id="hf-xotq" id="transmit-btn">
+            <span data-hf-id="hf-www1" id="spinner"></span><span data-hf-id="hf-udeo" id="btn-label" class="mono">Transmit Request →</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ SCENE 5: OUTRO (16-19s) ============ -->
+      <section data-hf-id="hf-2mv4" id="scene-outro" class="clip" data-start="16" data-duration="3" data-track-index="0">
+        <div data-hf-id="hf-2unr" class="stack" style="position:relative; width:100%; align-items:center; justify-content:center;">
+          <div data-hf-id="hf-fhvk" id="success-group" style="display:flex; flex-direction:column; align-items:center; gap:22px; position:absolute;">
+            <div data-hf-id="hf-p7s0" id="check-circle">
+              <svg data-hf-id="hf-3xkb" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path data-hf-id="hf-2q26" d="M20 6 9 17l-5-5" />
+              </svg>
+            </div>
+            <div data-hf-id="hf-9p55" id="success-title">Request Transmitted</div>
+            <div data-hf-id="hf-4vji" id="success-sub" class="mono">Response Within 24 Hours // AX-Protocol Active</div>
+          </div>
+
+          <div data-hf-id="hf-mx5k" id="logo-card" style="position:absolute;">
+            <div data-hf-id="hf-53pk" id="logo-mark" class="mono"><span data-hf-id="hf-x7aj" class="ax">AX</span> <span data-hf-id="hf-k53a" class="slash">//</span> <span data-hf-id="hf-gpfa">PBA</span></div>
+            <div data-hf-id="hf-sgog" id="logo-url" class="mono">projectsbyaxy.com</div>
+            <div data-hf-id="hf-wuti" id="logo-tag">Shift your reality.</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ AUDIO ============ -->
+      <audio data-hf-id="hf-geza" id="music" src="assets/music/happy-beats-business-moves-vol-1-by-ende-dot-app.mp3" data-start="0" data-duration="19" data-track-index="20" data-automation="{&quot;version&quot;:1,&quot;lanes&quot;:[{&quot;target&quot;:&quot;volume&quot;,&quot;points&quot;:[{&quot;t&quot;:0,&quot;v&quot;:0},{&quot;t&quot;:0.5,&quot;v&quot;:0.8},{&quot;t&quot;:13.5,&quot;v&quot;:0.8},{&quot;t&quot;:14.0,&quot;v&quot;:0.3},{&quot;t&quot;:14.6,&quot;v&quot;:0.3},{&quot;t&quot;:15.0,&quot;v&quot;:0.8},{&quot;t&quot;:17.8,&quot;v&quot;:0.8},{&quot;t&quot;:19,&quot;v&quot;:0}]}]}"></audio>
+
+      <!-- scene 1 sfx -->
+      <audio data-hf-id="hf-03ea" id="sfx-key-1" src="assets/sfx/keypress-001.wav" data-start="0.3" data-duration="0.3" data-volume="0.5" data-track-index="21"></audio>
+      <audio data-hf-id="hf-zuli" id="sfx-key-2" src="assets/sfx/keypress-002.wav" data-start="0.55" data-duration="0.3" data-volume="0.5" data-track-index="22"></audio>
+      <audio data-hf-id="hf-2cd3" id="sfx-key-3" src="assets/sfx/keypress-003.wav" data-start="0.8" data-duration="0.3" data-volume="0.5" data-track-index="21"></audio>
+
+      <!-- scene 2 sfx -->
+      <audio data-hf-id="hf-nt0o" id="sfx-spec-1" src="assets/sfx/click_005.ogg" data-start="4.0" data-duration="0.3" data-volume="0.45" data-track-index="21"></audio>
+      <audio data-hf-id="hf-ps6t" id="sfx-spec-2" src="assets/sfx/click_005.ogg" data-start="4.4" data-duration="0.3" data-volume="0.45" data-track-index="21"></audio>
+      <audio data-hf-id="hf-9a8i" id="sfx-spec-3" src="assets/sfx/click_005.ogg" data-start="4.8" data-duration="0.3" data-volume="0.45" data-track-index="21"></audio>
+      <audio data-hf-id="hf-iz2k" id="sfx-spec-4" src="assets/sfx/click_005.ogg" data-start="5.2" data-duration="0.3" data-volume="0.45" data-track-index="21"></audio>
+
+      <!-- scene 3 sfx -->
+      <audio data-hf-id="hf-hbqh" id="sfx-svc-1" src="assets/sfx/card-slide-1.ogg" data-start="6.52" data-duration="0.4" data-volume="0.45" data-track-index="21"></audio>
+      <audio data-hf-id="hf-vlu1" id="sfx-svc-2" src="assets/sfx/card-slide-1.ogg" data-start="7.52" data-duration="0.4" data-volume="0.45" data-track-index="21"></audio>
+      <audio data-hf-id="hf-nsit" id="sfx-svc-3" src="assets/sfx/card-slide-1.ogg" data-start="8.52" data-duration="0.4" data-volume="0.45" data-track-index="21"></audio>
+      <audio data-hf-id="hf-lqwa" id="sfx-svc-4" src="assets/sfx/card-slide-1.ogg" data-start="9.02" data-duration="0.4" data-volume="0.45" data-track-index="21"></audio>
+
+      <!-- scene 4 sfx -->
+      <audio data-hf-id="hf-2g10" id="sfx-name-1" src="assets/sfx/keypress-004.wav" data-start="10.8" data-duration="0.3" data-volume="0.4" data-track-index="21"></audio>
+      <audio data-hf-id="hf-dw9o" id="sfx-name-2" src="assets/sfx/keypress-001.wav" data-start="11.0" data-duration="0.3" data-volume="0.4" data-track-index="22"></audio>
+      <audio data-hf-id="hf-ebfa" id="sfx-email-1" src="assets/sfx/keypress-002.wav" data-start="11.8" data-duration="0.3" data-volume="0.4" data-track-index="21"></audio>
+      <audio data-hf-id="hf-stvs" id="sfx-email-2" src="assets/sfx/keypress-003.wav" data-start="12.0" data-duration="0.3" data-volume="0.4" data-track-index="22"></audio>
+      <audio data-hf-id="hf-0i9w" id="sfx-tag-1" src="assets/sfx/switch_002.ogg" data-start="12.5" data-duration="0.3" data-volume="0.5" data-track-index="21"></audio>
+      <audio data-hf-id="hf-tvxz" id="sfx-tag-2" src="assets/sfx/switch_002.ogg" data-start="12.9" data-duration="0.3" data-volume="0.5" data-track-index="21"></audio>
+      <audio data-hf-id="hf-9dxe" id="sfx-pkg" src="assets/sfx/click_005.ogg" data-start="13.3" data-duration="0.3" data-volume="0.45" data-track-index="21"></audio>
+      <audio data-hf-id="hf-w3f1" id="sfx-press" src="assets/sfx/click_003.ogg" data-start="14.0" data-duration="0.2" data-volume="0.55" data-track-index="21"></audio>
+      <audio data-hf-id="hf-tcm6" id="sfx-send" src="assets/sfx/drop_002.ogg" data-start="14.15" data-duration="0.4" data-volume="0.5" data-track-index="22"></audio>
+
+      <!-- scene 5 sfx -->
+      <audio data-hf-id="hf-9o5n" id="sfx-success" src="assets/sfx/impactBell_heavy_000.ogg" data-start="16.0" data-duration="0.8" data-volume="0.55" data-track-index="21"></audio>
+      <audio data-hf-id="hf-a1fl" id="sfx-logo-hit" src="assets/sfx/impactSoft_medium_001.ogg" data-start="17.52" data-duration="0.3" data-volume="0.5" data-track-index="21"></audio>
+    </div>
+
+    <script>
+      gsap.registerPlugin(TextPlugin);
+      var tl = gsap.timeline({ paused: true });
+
+      /* ===================== SCENE 1: HOOK (0-3s) ===================== */
+      tl.to("#scanline", { opacity: 1, duration: 0.05 }, 0.05)
+        .fromTo("#scanline", { xPercent: -100 }, { xPercent: 100, duration: 0.5, ease: "power2.inOut" }, 0.1)
+        .to("#scanline", { opacity: 0, duration: 0.1 }, 0.55);
+
+      tl.set("#logo-cursor", { opacity: 1 }, 0.25);
+      tl.to("#logo-type", { text: { value: "AX // PBA" }, duration: 0.6, ease: "none" }, 0.3);
+      tl.to("#logo-cursor", { opacity: 0, duration: 0.15, repeat: 3, yoyo: true }, 1.0);
+
+      // headline waterfall (binary opacity reveal, power4.out settle)
+      tl.set("#hl-1", { opacity: 1, y: 60 }, 1.1)
+        .to("#hl-1", { y: 0, duration: 0.2, ease: "power4.out" }, 1.1)
+        .set("#hl-2", { opacity: 1, y: 70 }, 1.28)
+        .to("#hl-2", { y: 0, duration: 0.22, ease: "power4.out" }, 1.28);
+
+      /* ===================== SCENE 2: TECH SPECS (3-6s) ===================== */
+      tl.fromTo("#tagline", { opacity: 0, scale: 0.9 }, { opacity: 1, scale: 1, duration: 0.5, ease: "power3.out" }, 3.2);
+
+      ["#spec-1", "#spec-2", "#spec-3", "#spec-4"].forEach(function (sel, i) {
+        var t = 4.0 + i * 0.4;
+        tl.fromTo(sel, { opacity: 0, y: 22 }, { opacity: 1, y: 0, duration: 0.35, ease: "power3.out" }, t);
+      });
+
+      /* ===================== SCENE 3: SERVICE MATRIX (6-10s) ===================== */
+      tl.fromTo("#svc-kicker", { opacity: 0, y: 14 }, { opacity: 1, y: 0, duration: 0.3, ease: "power3.out" }, 6.1);
+
+      var svcTimes = [6.52, 7.52, 8.52, 9.02];
+      ["#svc-1", "#svc-2", "#svc-3", "#svc-4"].forEach(function (sel, i) {
+        tl.fromTo(sel, { opacity: 0, x: -30 }, { opacity: 1, x: 0, duration: 0.35, ease: "power3.out" }, svcTimes[i]);
+      });
+
+      /* ===================== SCENE 4: INTAKE TERMINAL (10-16s) ===================== */
+      tl.fromTo("#term-kicker", { opacity: 0, y: 10 }, { opacity: 1, y: 0, duration: 0.3, ease: "power3.out" }, 10.1);
+      tl.fromTo("#field-name", { opacity: 0, y: 14 }, { opacity: 1, y: 0, duration: 0.3, ease: "power3.out" }, 10.3);
+      tl.to("#name-type", { text: { value: "Aanya Kapoor" }, duration: 0.6, ease: "none" }, 10.7);
+
+      tl.fromTo("#field-email", { opacity: 0, y: 14 }, { opacity: 1, y: 0, duration: 0.3, ease: "power3.out" }, 11.4);
+      tl.to("#email-type", { text: { value: "aanya@newco.in" }, duration: 0.6, ease: "none" }, 11.7);
+
+      tl.fromTo("#tags-row", { opacity: 0 }, { opacity: 1, duration: 0.2 }, 12.5);
+      tl.fromTo("#tag-fill-1", { scale: 0 }, { scale: 1, duration: 0.25, ease: "power3.out" }, 12.5);
+      tl.fromTo("#tag-fill-2", { scale: 0 }, { scale: 1, duration: 0.25, ease: "power3.out" }, 12.9);
+
+      tl.fromTo("#pkg-badge", { opacity: 0, y: 10 }, { opacity: 1, y: 0, duration: 0.3, ease: "power3.out" }, 13.3);
+
+      tl.fromTo("#transmit-btn", { opacity: 0 }, { opacity: 1, duration: 0.2 }, 13.8);
+      // press-dip
+      tl.to("#transmit-btn", { scale: 0.96, duration: 0.1, ease: "power2.out" }, 14.0)
+        .to("#transmit-btn", { scale: 1, duration: 0.15, ease: "power2.out" }, 14.1);
+      // label swap + spinner
+      tl.call(function () {
+        document.getElementById("btn-label").textContent = "Transmitting...";
+      }, [], 14.2);
+      tl.to("#spinner", { opacity: 1, duration: 0.1 }, 14.2);
+      tl.to("#spinner", { rotation: 1080, duration: 1.8, ease: "none" }, 14.2);
+
+      /* ===================== SCENE 5: OUTRO (16-19s) ===================== */
+      tl.fromTo("#check-circle", { opacity: 0, scale: 0 }, { opacity: 1, scale: 1, duration: 0.4, ease: "power3.out" }, 16.0);
+      tl.set("#success-title", { opacity: 1, y: 40 }, 16.25)
+        .to("#success-title", { y: 0, duration: 0.2, ease: "power4.out" }, 16.25);
+      tl.fromTo("#success-sub", { opacity: 0 }, { opacity: 1, duration: 0.3 }, 16.6);
+
+      // hard cut to logo card
+      tl.to("#success-group", { opacity: 0, duration: 0.01 }, 17.5);
+
+      tl.fromTo("#logo-card", { opacity: 0 }, { opacity: 1, duration: 0.01 }, 17.5);
+      tl.fromTo("#logo-mark", { opacity: 0, scale: 0.85 }, { opacity: 1, scale: 1, duration: 0.3, ease: "power3.out" }, 17.5);
+      tl.fromTo("#logo-url", { opacity: 0, y: 10 }, { opacity: 1, y: 0, duration: 0.3, ease: "power3.out" }, 17.62);
+      tl.fromTo("#logo-tag", { opacity: 0, y: 10 }, { opacity: 1, y: 0, duration: 0.3, ease: "power3.out" }, 17.74);
+
+      window.__timelines["brag"] = tl;
+    </script>
+  </body>
+</html>

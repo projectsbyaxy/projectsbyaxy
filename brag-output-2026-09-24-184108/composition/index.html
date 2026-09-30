@@ -1,0 +1,459 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=1920, height=1080">
+    <title>ProjectsByAxy // Brag (Phonk Edit)</title>
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3.14.2/dist/gsap.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3.14.2/dist/TextPlugin.min.js"></script>
+    <style>
+      * { box-sizing: border-box; }
+      body {
+        margin: 0;
+        background: #000000;
+        color: #ffffff;
+        font-family: "JetBrains Mono", monospace;
+        overflow: hidden;
+      }
+      #root {
+        position: relative;
+        width: 100%;
+        height: 100%;
+        overflow: hidden;
+        background: #000000;
+      }
+      .clip {
+        position: absolute;
+        inset: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      .display {
+        font-family: "Archivo Black", sans-serif;
+        text-transform: uppercase;
+      }
+      .mono {
+        font-family: "JetBrains Mono", monospace;
+        letter-spacing: 0.25em;
+        text-transform: uppercase;
+      }
+      .accent { color: #fb923c; }
+
+      #vignette {
+        position: absolute; inset: 0; z-index: 50; pointer-events: none;
+        background: radial-gradient(circle at 50% 50%, rgba(0,0,0,0) 40%, rgba(0,0,0,0.55) 100%);
+      }
+      #grain {
+        position: absolute; inset: 0; z-index: 51; pointer-events: none; opacity: 0.05;
+        background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+      }
+      #flash-r, #flash-g {
+        position: absolute; inset: 0; z-index: 58; pointer-events: none; mix-blend-mode: screen; opacity: 0;
+      }
+      #flash-r { background: #ff2d2d; }
+      #flash-g { background: #00e5ff; }
+      #flash {
+        position: absolute; inset: 0; z-index: 60; pointer-events: none;
+        background: #ffffff; opacity: 0;
+      }
+
+      .glow {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: 1100px;
+        height: 1100px;
+        border-radius: 50%;
+        background: radial-gradient(circle, rgba(251,146,60,0.2) 0%, rgba(251,146,60,0) 70%);
+        pointer-events: none;
+        opacity: 0;
+      }
+
+      .beat-line {
+        position: absolute;
+        inset: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 0 180px;
+        font-size: 84px;
+        line-height: 1.15;
+        text-align: center;
+        opacity: 0;
+      }
+      .beat-stack {
+        position: absolute;
+        inset: 0;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 20px;
+        opacity: 0;
+      }
+      .beat-stack .row {
+        font-size: 50px;
+        letter-spacing: 0.03em;
+      }
+      .kicker {
+        position: absolute;
+        top: 90px;
+        left: 0;
+        width: 100%;
+        text-align: center;
+        font-size: 16px;
+        letter-spacing: 0.4em;
+        color: #fb923c;
+        opacity: 0;
+      }
+
+      #cold-open { display: flex; align-items: center; justify-content: center; }
+      #cold-mark { font-size: 40px; letter-spacing: 0.4em; opacity: 0; }
+      #cold-mark .ax { color: #fb923c; }
+      #cold-mark .slash { color: rgba(255,255,255,0.4); }
+
+      #scene-drop .stack { display: flex; flex-direction: column; align-items: center; gap: 16px; position: relative; z-index: 1; }
+      #wordmark { font-size: 100px; letter-spacing: 0.03em; opacity: 0; }
+      #wordmark-sub { font-size: 30px; letter-spacing: 0.3em; color: rgba(255,255,255,0.65); opacity: 0; }
+
+      .stat-row { display: flex; gap: 70px; }
+      .stat-row .stat { display: flex; flex-direction: column; align-items: center; gap: 6px; }
+      .stat-row .stat .n { font-size: 52px; color: #fb923c; }
+      .stat-row .stat .l { font-size: 13px; letter-spacing: 0.2em; color: rgba(255,255,255,0.5); }
+
+      #process-row { display: flex; align-items: center; gap: 26px; font-size: 42px; }
+      #process-row .arrow { color: rgba(255,255,255,0.45); font-size: 32px; }
+
+      #pricing-row { display: flex; align-items: center; gap: 36px; font-size: 50px; }
+      #pricing-row .arrow { color: rgba(255,255,255,0.45); font-size: 30px; }
+      #pricing-row .tier-1 { color: rgba(255,255,255,0.55); }
+      #pricing-row .tier-3 { color: #fb923c; }
+
+      #quote-text { font-size: 46px; font-family: "Archivo Black", sans-serif; text-transform: none; max-width: 1400px; text-align: center; line-height: 1.25; }
+      #quote-attr { position: absolute; bottom: 130px; left: 0; width: 100%; text-align: center; font-size: 14px; letter-spacing: 0.2em; color: rgba(255,255,255,0.5); opacity: 0; }
+
+      #term-group { position: absolute; inset: 0; opacity: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+      .term-card {
+        width: 920px;
+        border: 1px solid rgba(255,255,255,0.16);
+        background: rgba(255,255,255,0.03);
+        padding: 40px 52px;
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+      }
+      #term-kicker { font-size: 14px; letter-spacing: 0.35em; color: #fb923c; opacity: 0; }
+      .term-field { display: flex; flex-direction: column; gap: 8px; opacity: 0; }
+      .term-field .flabel { font-size: 12px; letter-spacing: 0.3em; color: rgba(255,255,255,0.55); }
+      .term-field .fbox { border: 1px solid rgba(255,255,255,0.15); background: rgba(255,255,255,0.03); padding: 14px 18px; font-size: 19px; text-transform: none; letter-spacing: 0.02em; min-height: 22px; }
+      .tags-row { display: flex; gap: 14px; opacity: 0; }
+      .tag { display: flex; align-items: center; gap: 10px; border: 1px solid rgba(255,255,255,0.14); padding: 12px 16px; }
+      .tag .box { width: 16px; height: 16px; border: 1px solid rgba(255,255,255,0.3); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+      .tag .box .fill { width: 100%; height: 100%; background: #fb923c; }
+      .tag .label { font-size: 12px; letter-spacing: 0.15em; color: rgba(255,255,255,0.6); }
+      #pkg-badge { display: flex; align-items: center; justify-content: space-between; border: 1px solid rgba(251,146,60,0.35); padding: 12px 18px; opacity: 0; }
+      #pkg-badge .name { color: #fb923c; font-size: 15px; letter-spacing: 0.12em; }
+      #pkg-badge .locked { font-size: 11px; letter-spacing: 0.18em; color: rgba(255,255,255,0.4); }
+      #term-btn { position: relative; background: #ffffff; color: #000000; padding: 18px 0; text-align: center; font-size: 15px; letter-spacing: 0.35em; font-weight: 700; opacity: 0; }
+
+      #success-group { position: absolute; inset: 0; opacity: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 22px; }
+      #check-circle { width: 112px; height: 112px; border-radius: 50%; border: 1px solid rgba(255,255,255,0.35); display: flex; align-items: center; justify-content: center; }
+      #check-circle svg { width: 46px; height: 46px; }
+      #success-title { font-size: 44px; letter-spacing: 0.08em; }
+      #success-sub { font-size: 14px; letter-spacing: 0.22em; color: rgba(255,255,255,0.5); }
+
+      #outro-group { display: flex; flex-direction: column; align-items: center; gap: 20px; opacity: 0; }
+      #outro-logo { font-size: 104px; letter-spacing: 0.02em; }
+      #outro-tag { font-size: 26px; letter-spacing: 0.1em; color: rgba(255,255,255,0.9); opacity: 0; }
+    </style>
+  </head>
+  <body>
+    <div data-hf-id="hf-u1bg" id="root" data-composition-id="brag-phonk" data-start="0" data-width="1920" data-height="1080" data-duration="27.757">
+      <!-- ============ SCENE A: COLD OPEN (0-1.357s) ============ -->
+      <section data-hf-id="hf-y52z" id="scene-cold" class="clip" data-start="0" data-duration="1.357" data-track-index="0">
+        <div data-hf-id="hf-eqs4" id="cold-open">
+          <div data-hf-id="hf-a9jh" id="cold-mark" class="mono"><span data-hf-id="hf-x7aj" class="ax">AX</span> <span data-hf-id="hf-k53a" class="slash">//</span> <span data-hf-id="hf-gpfa">PBA</span></div>
+        </div>
+      </section>
+
+      <!-- ============ SCENE B: TENSION BUILD (1.357-8.557s) ============ -->
+      <section data-hf-id="hf-uura" id="scene-build" class="clip" data-start="1.357" data-duration="7.2" data-track-index="0">
+        <div data-hf-id="hf-x5mq" class="beat-line display" id="hook-1">We don't build websites.</div>
+        <div data-hf-id="hf-7obd" class="beat-line display" id="hook-2">We engineer digital ecosystems.</div>
+      </section>
+
+      <!-- ============ SCENE C: THE DROP (8.557-10.957s) ============ -->
+      <video data-hf-id="hf-tgfh" id="hero-video" src="assets/video/hero.mp4" muted playsinline data-start="8.557" data-duration="2.4" data-track-index="1" style="position:absolute; inset:0; width:100%; height:100%; object-fit:cover; opacity:0;"></video>
+      <div data-hf-id="hf-zcam" id="hero-video-overlay" class="clip" data-start="8.557" data-duration="2.4" data-track-index="1" style="position:absolute; inset:0; background:rgba(0,0,0,0.68); opacity:0;"></div>
+
+      <section data-hf-id="hf-fg73" id="scene-drop" class="clip" data-start="8.557" data-duration="2.4" data-track-index="0">
+        <div data-hf-id="hf-mruk" class="glow" id="glow-drop"></div>
+        <div data-hf-id="hf-d1zs" class="stack">
+          <div data-hf-id="hf-scoo" id="wordmark" class="display">ProjectsByAxy</div>
+          <div data-hf-id="hf-s7jj" id="wordmark-sub" class="mono">// AI Solutions</div>
+        </div>
+      </section>
+
+      <!-- ============ SCENE D: SERVICES (10.957-12.757s) ============ -->
+      <section data-hf-id="hf-n1ug" id="scene-services" class="clip" data-start="10.957" data-duration="1.8" data-track-index="0">
+        <div data-hf-id="hf-xn6a" class="kicker mono">Services //</div>
+        <div data-hf-id="hf-5072" class="beat-stack" id="svc-stack">
+          <div data-hf-id="hf-u2p3" class="row display">Brand Identity</div>
+          <div data-hf-id="hf-73zt" class="row display">Web Development</div>
+          <div data-hf-id="hf-8qrt" class="row display">D2C Store Development</div>
+          <div data-hf-id="hf-7fpe" class="row display">AI Content Creation</div>
+          <div data-hf-id="hf-yb0y" class="row display">Video &amp; Reels</div>
+          <div data-hf-id="hf-1865" class="row display">Growth Marketing</div>
+        </div>
+      </section>
+
+      <!-- ============ SCENE E: ABOUT (12.757-14.557s) ============ -->
+      <section data-hf-id="hf-6byb" id="scene-about" class="clip" data-start="12.757" data-duration="1.8" data-track-index="0">
+        <div data-hf-id="hf-150s" class="beat-line display" id="about-line" style="font-size:60px;">Hyderabad. India-Built. World-Deployed.</div>
+        <div data-hf-id="hf-y4x7" class="beat-stack" id="about-stats" style="gap:0;">
+          <div data-hf-id="hf-qwep" class="stat-row">
+            <div data-hf-id="hf-xa0m" class="stat"><span data-hf-id="hf-l9mj" class="n display">25+</span><span data-hf-id="hf-15lq" class="l mono">Projects</span></div>
+            <div data-hf-id="hf-tx7e" class="stat"><span data-hf-id="hf-uqba" class="n display">20+</span><span data-hf-id="hf-pacw" class="l mono">Clients</span></div>
+            <div data-hf-id="hf-ubif" class="stat"><span data-hf-id="hf-y22d" class="n display">98%</span><span data-hf-id="hf-3i74" class="l mono">Satisfaction</span></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ SCENE F: PROCESS (14.557-16.357s) ============ -->
+      <section data-hf-id="hf-r9hz" id="scene-process" class="clip" data-start="14.557" data-duration="1.8" data-track-index="0">
+        <div data-hf-id="hf-z62w" class="kicker mono">Execution Protocol //</div>
+        <div data-hf-id="hf-w3j0" id="process-row" class="display" style="opacity:0;">
+          <span data-hf-id="hf-3uh8">Scan</span><span data-hf-id="hf-v68i" class="arrow">→</span><span data-hf-id="hf-9xm8">Architect</span><span data-hf-id="hf-f1jq" class="arrow">→</span><span data-hf-id="hf-70ui">Deploy</span><span data-hf-id="hf-ffur" class="arrow">→</span><span data-hf-id="hf-pzdq">Sync</span>
+        </div>
+      </section>
+
+      <!-- ============ SCENE G: PROJECTS (16.357-18.157s) ============ -->
+      <section data-hf-id="hf-rbvu" id="scene-projects" class="clip" data-start="16.357" data-duration="1.8" data-track-index="0">
+        <div data-hf-id="hf-472o" class="kicker mono">Deployed //</div>
+        <div data-hf-id="hf-hrj7" class="beat-stack" id="proj-stack">
+          <div data-hf-id="hf-ehad" class="row display">Bespoke Web Systems</div>
+          <div data-hf-id="hf-xpnj" class="row display">Predictive Ops</div>
+          <div data-hf-id="hf-ek5d" class="row display">Auto-Content</div>
+        </div>
+      </section>
+
+      <!-- ============ SCENE H: PRICING (18.157-19.357s) ============ -->
+      <section data-hf-id="hf-wp3g" id="scene-pricing" class="clip" data-start="18.157" data-duration="1.2" data-track-index="0">
+        <div data-hf-id="hf-ehx3" id="pricing-row" class="display" style="opacity:0;">
+          <span data-hf-id="hf-kbzq" class="tier-1">Starter</span><span data-hf-id="hf-fu5s" class="arrow">→</span><span data-hf-id="hf-ne2q">Growth</span><span data-hf-id="hf-901h" class="arrow">→</span><span data-hf-id="hf-p9e5" class="tier-3">Domination</span>
+        </div>
+      </section>
+
+      <!-- ============ SCENE I: TESTIMONIAL (19.357-20.557s) ============ -->
+      <section data-hf-id="hf-33vg" id="scene-testimonial" class="clip" data-start="19.357" data-duration="1.2" data-track-index="0">
+        <div data-hf-id="hf-77qr" id="quote-text" style="opacity:0;">"Precision, high-velocity delivery, and absolute clarity."</div>
+        <div data-hf-id="hf-jlc9" id="quote-attr" class="mono">Elena Vance — CEO, Astral Tech</div>
+      </section>
+
+      <!-- ============ SCENE J: INTAKE TERMINAL — FULL FILL-UP (20.557-25.357s) ============ -->
+      <section data-hf-id="hf-w0ss" id="scene-terminal" class="clip" data-start="20.557" data-duration="4.8" data-track-index="0">
+        <div data-hf-id="hf-ou42" class="glow" id="glow-term" style="opacity:0.5;"></div>
+        <div data-hf-id="hf-u4jl" id="term-group">
+          <div data-hf-id="hf-bulp" class="term-card">
+            <div data-hf-id="hf-emjm" id="term-kicker" class="mono">Submit Intake Request</div>
+            <div data-hf-id="hf-cuxz" class="term-field" id="field-name">
+              <div data-hf-id="hf-pie2" class="flabel mono">Operator Name *</div>
+              <div data-hf-id="hf-5f9q" class="fbox mono"><span data-hf-id="hf-2q7g" id="name-type"></span></div>
+            </div>
+            <div data-hf-id="hf-oasu" class="term-field" id="field-email">
+              <div data-hf-id="hf-vz01" class="flabel mono">Email Address *</div>
+              <div data-hf-id="hf-5q4y" class="fbox mono"><span data-hf-id="hf-1wcj" id="email-type"></span></div>
+            </div>
+            <div data-hf-id="hf-m3hm" class="tags-row" id="tags-row">
+              <div data-hf-id="hf-og20" class="tag"><span data-hf-id="hf-2l5s" class="box"><span data-hf-id="hf-ywbk" class="fill" id="tag-fill-1"></span></span><span data-hf-id="hf-237l" class="label mono">Web Development</span></div>
+              <div data-hf-id="hf-oqm8" class="tag"><span data-hf-id="hf-qahk" class="box"><span data-hf-id="hf-7k7f" class="fill" id="tag-fill-2"></span></span><span data-hf-id="hf-q5a2" class="label mono">AI Content Creation</span></div>
+            </div>
+            <div data-hf-id="hf-iwev" id="pkg-badge">
+              <span data-hf-id="hf-36k8" class="name mono">Domination — ₹74,999</span>
+              <span data-hf-id="hf-ine2" class="locked mono">Locked</span>
+            </div>
+            <div data-hf-id="hf-z24x" id="term-btn" class="mono">Transmit Request →</div>
+          </div>
+        </div>
+        <div data-hf-id="hf-grzo" id="success-group">
+          <div data-hf-id="hf-p7s0" id="check-circle">
+            <svg data-hf-id="hf-3xkb" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path data-hf-id="hf-2q26" d="M20 6 9 17l-5-5" />
+            </svg>
+          </div>
+          <div data-hf-id="hf-zh6w" id="success-title" class="display">Request Transmitted</div>
+          <div data-hf-id="hf-4vji" id="success-sub" class="mono">Response Within 24 Hours // AX-Protocol Active</div>
+        </div>
+      </section>
+
+      <!-- ============ SCENE K: OUTRO (25.357-27.757s) ============ -->
+      <section data-hf-id="hf-ip0c" id="scene-outro" class="clip" data-start="25.357" data-duration="2.4" data-track-index="0">
+        <div data-hf-id="hf-0wvo" id="outro-group">
+          <div data-hf-id="hf-38m8" id="outro-logo" class="display">ProjectsByAxy</div>
+          <div data-hf-id="hf-3b7x" id="outro-tag" class="display">Shift your reality.</div>
+        </div>
+      </section>
+
+      <!-- ============ ALWAYS-ON GRIT/TRANSITION LAYERS ============ -->
+      <div data-hf-id="hf-117q" id="vignette" class="clip" data-start="0" data-duration="27.757" data-track-index="0"></div>
+      <div data-hf-id="hf-ssdl" id="grain" class="clip" data-start="0" data-duration="27.757" data-track-index="0"></div>
+      <div data-hf-id="hf-8fgv" id="flash-r" class="clip" data-start="0" data-duration="27.757" data-track-index="0"></div>
+      <div data-hf-id="hf-y85m" id="flash-g" class="clip" data-start="0" data-duration="27.757" data-track-index="0"></div>
+      <div data-hf-id="hf-zd7i" id="flash" class="clip" data-start="0" data-duration="27.757" data-track-index="0"></div>
+
+      <!-- ============ AUDIO ============ -->
+      <audio data-hf-id="hf-vxvy" id="music" src="assets/music/akxneshiva.mp3" data-start="0" data-duration="27.757" data-track-index="20" data-automation="{&quot;version&quot;:1,&quot;lanes&quot;:[{&quot;target&quot;:&quot;volume&quot;,&quot;points&quot;:[{&quot;t&quot;:0,&quot;v&quot;:0.28},{&quot;t&quot;:8.4,&quot;v&quot;:0.3},{&quot;t&quot;:8.557,&quot;v&quot;:0.9},{&quot;t&quot;:26,&quot;v&quot;:0.9},{&quot;t&quot;:27.757,&quot;v&quot;:0.65}]}]}"></audio>
+
+      <audio data-hf-id="hf-eqr1" id="sfx-cold" src="assets/sfx/glitch_002.ogg" data-start="0.05" data-duration="0.2" data-volume="0.5" data-track-index="21"></audio>
+      <audio data-hf-id="hf-rzyb" id="sfx-build-cut" src="assets/sfx/error_005.ogg" data-start="4.957" data-duration="0.2" data-volume="0.35" data-track-index="21"></audio>
+      <audio data-hf-id="hf-xx10" id="sfx-drop" src="assets/sfx/impactSoft_heavy_000.ogg" data-start="8.557" data-duration="0.55" data-volume="0.6" data-track-index="21"></audio>
+      <audio data-hf-id="hf-29c5" id="sfx-key-1" src="assets/sfx/keypress-001.wav" data-start="20.75" data-duration="0.2" data-volume="0.35" data-track-index="21"></audio>
+      <audio data-hf-id="hf-mnzp" id="sfx-key-2" src="assets/sfx/keypress-002.wav" data-start="21.35" data-duration="0.2" data-volume="0.35" data-track-index="22"></audio>
+      <audio data-hf-id="hf-7oih" id="sfx-press" src="assets/sfx/impactSoft_heavy_003.ogg" data-start="22.957" data-duration="0.55" data-volume="0.55" data-track-index="21"></audio>
+      <audio data-hf-id="hf-aivh" id="sfx-success" src="assets/sfx/impactBell_heavy_000.ogg" data-start="23.557" data-duration="0.8" data-volume="0.55" data-track-index="22"></audio>
+      <audio data-hf-id="hf-x2wq" id="sfx-outro" src="assets/sfx/impactBell_heavy_004.ogg" data-start="25.357" data-duration="0.8" data-volume="0.55" data-track-index="21"></audio>
+      <audio data-hf-id="hf-3wvr" id="sfx-final" src="assets/sfx/impactSoft_heavy_000.ogg" data-start="27.757" data-duration="0.5" data-volume="0.5" data-track-index="22"></audio>
+
+      <audio data-hf-id="hf-wbhh" id="sfx-key-3" src="assets/sfx/keypress-001.wav" data-start="20.85" data-duration="0.15" data-volume="0.3" data-track-index="23"></audio>
+      <audio data-hf-id="hf-ee7d" id="sfx-key-4" src="assets/sfx/keypress-002.wav" data-start="21.45" data-duration="0.15" data-volume="0.3" data-track-index="24"></audio>
+    </div>
+
+    <script>
+      gsap.registerPlugin(TextPlugin);
+      var tl = gsap.timeline({ paused: true });
+
+      /* ---- transition helpers ---- */
+      // bigHit: white flash + chromatic fringe + screen shake — reserved for major beats
+      function bigHit(t) {
+        tl.set("#flash", { opacity: 0.9 }, t);
+        tl.to("#flash", { opacity: 0, duration: 0.07, ease: "power2.out" }, t + 0.01);
+        tl.set("#flash-r", { opacity: 0.5 }, t);
+        tl.set("#flash-g", { opacity: 0.5 }, t + 0.012);
+        tl.to("#flash-r", { opacity: 0, duration: 0.09 }, t + 0.02);
+        tl.to("#flash-g", { opacity: 0, duration: 0.09 }, t + 0.03);
+        tl.set("#root", { x: -14 }, t);
+        tl.to("#root", { x: 10, duration: 0.03, ease: "none" }, t + 0.035);
+        tl.to("#root", { x: -5, duration: 0.03, ease: "none" }, t + 0.072);
+        tl.to("#root", { x: 0, duration: 0.03, ease: "none" }, t + 0.109);
+      }
+      // softCut: lighter flash + tiny fringe, no shake — regular scene-to-scene cuts
+      function softCut(t) {
+        tl.set("#flash", { opacity: 0.4 }, t);
+        tl.to("#flash", { opacity: 0, duration: 0.05, ease: "power2.out" }, t + 0.008);
+        tl.set("#flash-r", { opacity: 0.3 }, t);
+        tl.to("#flash-r", { opacity: 0, duration: 0.06 }, t + 0.015);
+      }
+      // pulse: subtle scale bump on a held element, keeps it breathing with the beat
+      function pulse(sel, t) {
+        tl.to(sel, { scale: 1.045, duration: 0.07, ease: "power2.out" }, t)
+          .to(sel, { scale: 1, duration: 0.09, ease: "power2.in" }, t + 0.07);
+      }
+
+      /* ===================== SCENE A: COLD OPEN (0-1.357s) ===================== */
+      bigHit(0.05);
+      tl.set("#cold-mark", { opacity: 1 }, 0.05);
+      tl.to("#cold-mark", { opacity: 0.15, duration: 0.03 }, 0.12);
+      tl.to("#cold-mark", { opacity: 1, duration: 0.03 }, 0.16);
+      tl.to("#cold-mark", { opacity: 0.2, duration: 0.03 }, 0.32);
+      tl.to("#cold-mark", { opacity: 1, duration: 0.03 }, 0.38);
+      tl.to("#cold-mark", { opacity: 1, duration: 0.1 }, 0.6);
+
+      /* ===================== SCENE B: TENSION BUILD (1.357-8.557s) ===================== */
+      softCut(1.357);
+      tl.fromTo("#hook-1", { opacity: 0, scale: 1.08 }, { opacity: 1, scale: 1, duration: 0.12, ease: "expo.out" }, 1.365);
+      tl.to("#hook-1", { opacity: 0, duration: 0.06 }, 4.94);
+      softCut(4.957);
+      tl.fromTo("#hook-2", { opacity: 0, scale: 1.08 }, { opacity: 1, scale: 1, duration: 0.12, ease: "expo.out" }, 4.965);
+
+      /* ===================== SCENE C: THE DROP (8.557-10.957s) ===================== */
+      bigHit(8.557);
+      tl.fromTo("#hero-video", { opacity: 0 }, { opacity: 0.65, duration: 0.1, ease: "power2.out" }, 8.557);
+      tl.fromTo("#hero-video-overlay", { opacity: 0 }, { opacity: 1, duration: 0.1, ease: "power2.out" }, 8.557);
+      tl.fromTo("#glow-drop", { opacity: 0 }, { opacity: 1, duration: 0.15, ease: "power2.out" }, 8.567);
+      tl.fromTo("#wordmark", { opacity: 0, scale: 1.22 }, { opacity: 1, scale: 1, duration: 0.13, ease: "expo.out" }, 8.577);
+      tl.fromTo("#wordmark-sub", { opacity: 0, y: 10 }, { opacity: 1, y: 0, duration: 0.15, ease: "power3.out" }, 8.72);
+      pulse("#wordmark", 9.157);
+      pulse("#wordmark", 9.757);
+
+      /* ===================== SCENE D: SERVICES (10.957-12.757s) ===================== */
+      softCut(10.957);
+      tl.fromTo("#svc-stack", { opacity: 0, scale: 1.12 }, { opacity: 1, scale: 1, duration: 0.13, ease: "expo.out" }, 10.965);
+      pulse("#svc-stack", 11.557);
+      pulse("#svc-stack", 12.157);
+
+      /* ===================== SCENE E: ABOUT (12.757-14.557s) ===================== */
+      softCut(12.757);
+      tl.fromTo("#about-line", { opacity: 0, scale: 1.12 }, { opacity: 1, scale: 1, duration: 0.12, ease: "expo.out" }, 12.765);
+      tl.to("#about-line", { opacity: 0, duration: 0.06 }, 13.32);
+      softCut(13.357);
+      tl.fromTo("#about-stats", { opacity: 0, scale: 1.12 }, { opacity: 1, scale: 1, duration: 0.13, ease: "expo.out" }, 13.365);
+      pulse("#about-stats", 13.957);
+
+      /* ===================== SCENE F: PROCESS (14.557-16.357s) ===================== */
+      softCut(14.557);
+      tl.fromTo("#process-row", { opacity: 0, scale: 1.12 }, { opacity: 1, scale: 1, duration: 0.13, ease: "expo.out" }, 14.565);
+      pulse("#process-row", 15.157);
+      pulse("#process-row", 15.757);
+
+      /* ===================== SCENE G: PROJECTS (16.357-18.157s) ===================== */
+      softCut(16.357);
+      tl.fromTo("#proj-stack", { opacity: 0, scale: 1.12 }, { opacity: 1, scale: 1, duration: 0.13, ease: "expo.out" }, 16.365);
+      pulse("#proj-stack", 16.957);
+      pulse("#proj-stack", 17.557);
+
+      /* ===================== SCENE H: PRICING (18.157-19.357s) ===================== */
+      softCut(18.157);
+      tl.fromTo("#pricing-row", { opacity: 0, scale: 1.12 }, { opacity: 1, scale: 1, duration: 0.12, ease: "expo.out" }, 18.165);
+      pulse("#pricing-row", 18.757);
+
+      /* ===================== SCENE I: TESTIMONIAL (19.357-20.557s) ===================== */
+      softCut(19.357);
+      tl.fromTo("#quote-text", { opacity: 0, scale: 1.1 }, { opacity: 1, scale: 1, duration: 0.13, ease: "expo.out" }, 19.365);
+      tl.fromTo("#quote-attr", { opacity: 0 }, { opacity: 1, duration: 0.15 }, 19.7);
+
+      /* ===================== SCENE J: INTAKE TERMINAL — FULL FILL-UP (20.557-25.357s) ===================== */
+      bigHit(20.557);
+      tl.fromTo("#glow-term", { opacity: 0 }, { opacity: 0.5, duration: 0.15 }, 20.567);
+      tl.fromTo("#term-group", { opacity: 0, scale: 1.08 }, { opacity: 1, scale: 1, duration: 0.13, ease: "expo.out" }, 20.577);
+      tl.fromTo("#term-kicker", { opacity: 0 }, { opacity: 1, duration: 0.1 }, 20.6);
+      tl.fromTo("#field-name", { opacity: 0, y: 8 }, { opacity: 1, y: 0, duration: 0.1, ease: "power3.out" }, 20.65);
+      tl.to("#name-type", { text: { value: "Aanya Kapoor" }, duration: 0.45, ease: "none" }, 20.68);
+
+      softCut(21.157);
+      tl.fromTo("#field-email", { opacity: 0, y: 8 }, { opacity: 1, y: 0, duration: 0.1, ease: "power3.out" }, 21.167);
+      tl.to("#email-type", { text: { value: "aanya@newco.in" }, duration: 0.5, ease: "none" }, 21.2);
+
+      softCut(21.757);
+      tl.fromTo("#tags-row", { opacity: 0 }, { opacity: 1, duration: 0.08 }, 21.765);
+      tl.fromTo("#tag-fill-1", { scale: 0 }, { scale: 1, duration: 0.12, ease: "expo.out" }, 21.765);
+
+      softCut(22.357);
+      tl.fromTo("#tag-fill-2", { scale: 0 }, { scale: 1, duration: 0.12, ease: "expo.out" }, 22.365);
+
+      tl.fromTo("#pkg-badge", { opacity: 0, y: 8 }, { opacity: 1, y: 0, duration: 0.12, ease: "power3.out" }, 22.657);
+
+      softCut(22.957);
+      tl.fromTo("#term-btn", { opacity: 0 }, { opacity: 1, duration: 0.08 }, 22.6);
+      tl.to("#term-btn", { scale: 0.94, duration: 0.075, ease: "power2.out" }, 22.957)
+        .to("#term-btn", { scale: 1, duration: 0.12, ease: "power2.out" }, 23.037);
+
+      bigHit(23.557);
+      tl.to("#term-group", { opacity: 0, duration: 0.06 }, 23.557);
+      tl.fromTo("#success-group", { opacity: 0, scale: 1.1 }, { opacity: 1, scale: 1, duration: 0.14, ease: "expo.out" }, 23.577);
+      pulse("#success-group", 24.157);
+      pulse("#success-group", 24.757);
+
+      /* ===================== SCENE K: OUTRO (25.357-27.757s) ===================== */
+      bigHit(25.357);
+      tl.fromTo("#outro-group", { opacity: 0 }, { opacity: 1, duration: 0.01 }, 25.367);
+      tl.fromTo("#outro-logo", { opacity: 0, scale: 1.18 }, { opacity: 1, scale: 1, duration: 0.14, ease: "expo.out" }, 25.377);
+      tl.fromTo("#outro-tag", { opacity: 0, y: 10 }, { opacity: 1, y: 0, duration: 0.15, ease: "power3.out" }, 25.6);
+      pulse("#outro-logo", 26.557);
+      bigHit(27.757);
+
+      window.__timelines["brag-phonk"] = tl;
+    </script>
+  </body>
+</html>
