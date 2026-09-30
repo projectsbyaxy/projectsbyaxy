@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=1920, height=1080">
+    <title>ProjectsByAxy // Brag (True Motion Graphics)</title>
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3.14.2/dist/gsap.min.js"></script>
+    <style>
+      * { box-sizing: border-box; }
+      body {
+        margin: 0;
+        background: #000000;
+        color: #ffffff;
+        font-family: "JetBrains Mono", monospace;
+        overflow: hidden;
+      }
+      #root {
+        position: relative;
+        width: 100%;
+        height: 100%;
+        overflow: hidden;
+        background: #000000;
+      }
+      .clip {
+        position: absolute;
+        inset: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      .display { font-family: "Archivo Black", sans-serif; text-transform: uppercase; }
+      .mono { font-family: "JetBrains Mono", monospace; letter-spacing: 0.25em; text-transform: uppercase; }
+      .spin-el { transform-box: fill-box; transform-origin: 50% 50%; }
+
+      /* continuously-scrolling ambient grid — runs under the entire video */
+      #bg-grid {
+        position: absolute; inset: -200px; z-index: 1; pointer-events: none; opacity: 0.09;
+        background-image:
+          linear-gradient(rgba(251,146,60,0.5) 1px, transparent 1px),
+          linear-gradient(90deg, rgba(251,146,60,0.5) 1px, transparent 1px);
+        background-size: 84px 84px;
+      }
+
+      #vignette { position: absolute; inset: 0; z-index: 50; pointer-events: none; background: radial-gradient(circle at 50% 50%, rgba(0,0,0,0) 35%, rgba(0,0,0,0.6) 100%); }
+      #grain {
+        position: absolute; inset: 0; z-index: 51; pointer-events: none; opacity: 0.05;
+        background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+      }
+      #flash-r, #flash-g { position: absolute; inset: 0; z-index: 58; pointer-events: none; mix-blend-mode: screen; opacity: 0; }
+      #flash-r { background: #ff2d2d; }
+      #flash-g { background: #00e5ff; }
+      #flash { position: absolute; inset: 0; z-index: 60; pointer-events: none; background: #ffffff; opacity: 0; }
+
+      #cold-open { display: flex; align-items: center; justify-content: center; position: relative; z-index: 55; }
+      #cold-mark { font-size: 40px; letter-spacing: 0.4em; opacity: 0; }
+      #cold-mark .ax { color: #fb923c; }
+      #cold-mark .slash { color: rgba(255,255,255,0.4); }
+
+      .glow {
+        position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+        width: 1100px; height: 1100px; border-radius: 50%;
+        background: radial-gradient(circle, rgba(251,146,60,0.2) 0%, rgba(251,146,60,0) 70%);
+        pointer-events: none; opacity: 0;
+      }
+
+      /* ---- kinetic two-tier typography ---- */
+      .kinetic-wrap { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: flex-start; justify-content: center; padding-left: 150px; gap: 6px; z-index: 20; }
+      .kinetic-small { font-family: "JetBrains Mono", monospace; letter-spacing: 0.35em; font-size: 26px; color: rgba(255,255,255,0.55); opacity: 0; text-transform: uppercase; }
+      .kinetic-big { font-family: "Archivo Black", sans-serif; font-size: 118px; line-height: 0.94; color: #fb923c; text-transform: uppercase; opacity: 0; letter-spacing: -0.01em; }
+      .punch-wrap { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; z-index: 20; }
+      .punch-line { font-family: "Archivo Black", sans-serif; font-size: 92px; text-align: center; max-width: 1400px; line-height: 1.05; text-transform: uppercase; opacity: 0; text-shadow: 0 4px 30px rgba(0,0,0,0.9); }
+      .punch-line .ax { color: #fb923c; }
+      .punch-bg { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: top center; opacity: 0; z-index: 5; }
+      .punch-bg-overlay { position: absolute; inset: 0; background: rgba(0,0,0,0.32); z-index: 10; opacity: 0; }
+
+      /* ---- orbiting shard accent (svg, continuous rotation for the whole scene) ---- */
+      .orbit-svg { position: absolute; opacity: 0; z-index: 25; }
+
+      .caption {
+        position: absolute; left: 60px; bottom: 64px; z-index: 55;
+        display: flex; align-items: center; gap: 14px; opacity: 0;
+      }
+      .caption .bar { width: 3px; height: 34px; background: #fb923c; flex-shrink: 0; }
+      .caption .txt { font-size: 22px; font-family: "Archivo Black", sans-serif; text-transform: none; letter-spacing: 0.01em; color: #ffffff; text-shadow: 0 2px 12px rgba(0,0,0,0.8); }
+
+      #scene-hero .stack { display: flex; flex-direction: column; align-items: flex-start; gap: 14px; position: relative; z-index: 20; padding-left: 90px; }
+      #wordmark { font-size: 92px; letter-spacing: 0.02em; opacity: 0; }
+      #wordmark-sub { font-size: 28px; letter-spacing: 0.3em; color: rgba(255,255,255,0.7); opacity: 0; }
+      #hero-ring { position: absolute; opacity: 0; z-index: 5; }
+
+      /* ---- network scene ---- */
+      .network-wrap { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 28px; z-index: 20; }
+      .network-label { font-family: "Archivo Black", sans-serif; font-size: 40px; text-align: center; max-width: 1100px; line-height: 1.15; text-transform: none; opacity: 0; }
+      .network-label .ax { color: #fb923c; }
+
+      /* ---- services ring scene ---- */
+      .ring-wrap { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; z-index: 20; }
+      .ring-label {
+        position: absolute; font-family: "JetBrains Mono", monospace; font-size: 17px; letter-spacing: 0.1em;
+        text-transform: uppercase; color: #ffffff; opacity: 0; white-space: nowrap; text-shadow: 0 2px 10px rgba(0,0,0,0.9);
+      }
+      .ring-core { position: absolute; font-family: "Archivo Black", sans-serif; font-size: 26px; color: #fb923c; text-align: center; opacity: 0; }
+
+      /* ---- process stepper scene ---- */
+      .stepper-wrap { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 20; gap: 40px; }
+      .stepper-title { font-family: "JetBrains Mono", monospace; font-size: 15px; letter-spacing: 0.3em; text-transform: uppercase; color: rgba(255,255,255,0.5); opacity: 0; }
+      .step-item { display: flex; flex-direction: column; align-items: center; gap: 10px; width: 300px; opacity: 0.35; }
+      .step-num { font-family: "Archivo Black", sans-serif; font-size: 22px; color: rgba(255,255,255,0.65); }
+      .step-name { font-family: "JetBrains Mono", monospace; font-size: 13px; letter-spacing: 0.08em; text-transform: uppercase; color: rgba(255,255,255,0.5); text-align: center; }
+
+      #outro-group { display: flex; flex-direction: column; align-items: center; gap: 20px; opacity: 0; position: relative; z-index: 20; }
+      #outro-logo { font-size: 104px; letter-spacing: 0.02em; }
+      #outro-tag { font-size: 26px; letter-spacing: 0.1em; color: rgba(255,255,255,0.9); opacity: 0; }
+      #outro-ring { position: absolute; opacity: 0; z-index: 5; }
+    </style>
+  </head>
+  <body>
+    <div id="root" data-composition-id="brag-true-motion" data-start="0" data-width="1920" data-height="1080" data-duration="19.357">
+      <div id="bg-grid"></div>
+
+      <!-- ============ SCENE 1: COLD OPEN (0-1.357s) ============ -->
+      <section id="scene-cold" class="clip" data-start="0" data-duration="1.357" data-track-index="0">
+        <div id="cold-open">
+          <div id="cold-mark" class="mono"><span class="ax">AX</span> <span class="slash">//</span> <span>PBA</span></div>
+        </div>
+      </section>
+
+      <!-- ============ SCENE 2: HOOK — KINETIC TYPE + ORBITING SHARDS (1.357-4.957s) ============ -->
+      <section id="scene-hook" class="clip" data-start="1.357" data-duration="3.6" data-track-index="0">
+        <div class="kinetic-wrap">
+          <div class="kinetic-small mono" id="hook-small">We Don't Build</div>
+          <div class="kinetic-big" id="hook-big">Websites.</div>
+        </div>
+        <svg id="orbit-hook" class="orbit-svg spin-el" width="900" height="900" viewBox="0 0 900 900" style="right:-260px; top:50%; transform:translateY(-50%);">
+          <g id="orbit-hook-spin" style="transform-origin: 450px 450px;">
+            <polygon points="450,90 480,150 420,150" fill="#fb923c" />
+            <polygon points="723,225 693,285 753,285" fill="#f5f0e8" transform="rotate(120 723 255)" />
+            <polygon points="723,675 693,615 753,615" fill="#fb923c" transform="rotate(240 723 645)" />
+          </g>
+        </svg>
+      </section>
+
+      <!-- ============ SCENE 3: THE DROP — REAL HERO VIDEO (4.957-7.357s) ============ -->
+      <video id="hero-video" src="assets/video/hero.mp4" muted playsinline data-start="4.957" data-duration="2.4" data-track-index="1" style="position:absolute; inset:0; width:100%; height:100%; object-fit:cover; opacity:0;"></video>
+      <div id="hero-video-overlay" class="clip" data-start="4.957" data-duration="2.4" data-track-index="1" style="position:absolute; inset:0; background:rgba(0,0,0,0.5); opacity:0;"></div>
+
+      <section id="scene-hero" class="clip" data-start="4.957" data-duration="2.4" data-track-index="0">
+        <div class="glow" id="glow-hero"></div>
+        <svg id="hero-ring" class="spin-el" width="520" height="520" viewBox="0 0 520 520" style="left:60px; top:50%; transform:translateY(-50%);">
+          <circle cx="260" cy="260" r="220" fill="none" stroke="#fb923c" stroke-width="2" stroke-dasharray="10 14" opacity="0.55" />
+        </svg>
+        <div class="stack">
+          <div id="wordmark" class="display">ProjectsByAxy</div>
+          <div id="wordmark-sub" class="mono">// AI Solutions</div>
+        </div>
+      </section>
+
+      <!-- ============ SCENE 4: NETWORK — ILLUSTRATED, CONTINUOUS PULSE (7.357-10.057s) ============ -->
+      <section id="scene-network" class="clip" data-start="7.357" data-duration="2.7" data-track-index="0">
+        <div class="network-wrap">
+          <svg id="network-svg" width="900" height="360" viewBox="0 0 900 360">
+            <path id="net-line-1" d="M 150 280 L 380 150" fill="none" stroke="rgba(251,146,60,0.35)" stroke-width="2" />
+            <path id="net-line-2" d="M 380 150 L 620 210" fill="none" stroke="rgba(251,146,60,0.35)" stroke-width="2" />
+            <path id="net-line-3" d="M 380 150 L 450 60" fill="none" stroke="rgba(251,146,60,0.35)" stroke-width="2" />
+            <path id="net-line-4" d="M 620 210 L 780 120" fill="none" stroke="rgba(251,146,60,0.35)" stroke-width="2" />
+            <path id="net-pulse-1" d="M 150 280 L 380 150" fill="none" stroke="#fb923c" stroke-width="3" stroke-linecap="round" stroke-dasharray="4 220" />
+            <path id="net-pulse-2" d="M 380 150 L 620 210" fill="none" stroke="#fb923c" stroke-width="3" stroke-linecap="round" stroke-dasharray="4 220" />
+            <path id="net-pulse-3" d="M 380 150 L 450 60" fill="none" stroke="#fb923c" stroke-width="3" stroke-linecap="round" stroke-dasharray="4 220" />
+            <path id="net-pulse-4" d="M 620 210 L 780 120" fill="none" stroke="#fb923c" stroke-width="3" stroke-linecap="round" stroke-dasharray="4 220" />
+            <circle id="node-1" cx="150" cy="280" r="10" fill="#fb923c" />
+            <circle id="node-2" cx="380" cy="150" r="14" fill="#fb923c" />
+            <circle id="node-3" cx="620" cy="210" r="10" fill="#fb923c" />
+            <circle id="node-4" cx="450" cy="60" r="8" fill="#f5f0e8" />
+            <circle id="node-5" cx="780" cy="120" r="8" fill="#f5f0e8" />
+          </svg>
+          <div class="network-label" id="network-label">We Engineer <span class="ax">Digital Ecosystems.</span></div>
+        </div>
+      </section>
+
+      <!-- ============ SCENE 5: SERVICES RING — ILLUSTRATED, CONTINUOUS ORBIT (10.057-12.457s) ============ -->
+      <section id="scene-services" class="clip" data-start="10.057" data-duration="2.4" data-track-index="0">
+        <div class="ring-wrap">
+          <svg id="services-ring-svg" width="620" height="620" viewBox="0 0 620 620">
+            <circle cx="310" cy="310" r="230" fill="none" stroke="rgba(251,146,60,0.3)" stroke-width="2" stroke-dasharray="6 10" />
+            <g id="services-marker-spin" style="transform-origin: 310px 310px;">
+              <circle cx="540" cy="310" r="9" fill="#fb923c" />
+            </g>
+          </svg>
+          <div class="ring-core" id="ring-core">
+            <div id="ring-core-num" class="display" style="font-size:52px;">6</div>
+            <div class="mono" style="font-size:14px; letter-spacing:0.3em;">Services</div>
+          </div>
+          <div class="ring-label" id="svc-1" style="top: 14%; left: 50%; transform: translate(-50%, 0);">Brand Identity</div>
+          <div class="ring-label" id="svc-2" style="top: 32%; left: 84%; transform: translate(-50%, 0);">Web Development</div>
+          <div class="ring-label" id="svc-3" style="top: 68%; left: 84%; transform: translate(-50%, 0);">D2C Store Development</div>
+          <div class="ring-label" id="svc-4" style="top: 86%; left: 50%; transform: translate(-50%, 0);">AI Content Creation</div>
+          <div class="ring-label" id="svc-5" style="top: 68%; left: 16%; transform: translate(-50%, 0);">Video &amp; Reels</div>
+          <div class="ring-label" id="svc-6" style="top: 32%; left: 16%; transform: translate(-50%, 0);">Growth Marketing</div>
+        </div>
+      </section>
+
+      <!-- ============ SCENE 6: PROCESS STEPPER — ILLUSTRATED, CONTINUOUS TRAVEL (12.457-14.857s) ============ -->
+      <section id="scene-process" class="clip" data-start="12.457" data-duration="2.4" data-track-index="0">
+        <div class="stepper-wrap">
+          <div class="stepper-title mono" id="stepper-title">Execution Protocol //</div>
+          <div style="position: relative; width: 1360px; height: 6px;">
+            <div style="position:absolute; inset:0; background: rgba(255,255,255,0.12);"></div>
+            <div id="stepper-fill" style="position:absolute; left:0; top:0; bottom:0; width:0%; background:#fb923c;"></div>
+            <div id="stepper-dot" style="position:absolute; top:50%; left:0; width:20px; height:20px; margin-top:-10px; margin-left:-10px; border-radius:50%; background:#fb923c; box-shadow:0 0 18px 4px rgba(251,146,60,0.6);"></div>
+          </div>
+          <div style="display:flex; justify-content:space-between; width:1360px;">
+            <div class="step-item" id="step-1"><div class="step-num">01</div><div class="step-name">Discovery &amp; Neural Mapping</div></div>
+            <div class="step-item" id="step-2"><div class="step-num">02</div><div class="step-name">System Design &amp; Blueprint</div></div>
+            <div class="step-item" id="step-3"><div class="step-num">03</div><div class="step-name">High-Velocity Build</div></div>
+            <div class="step-item" id="step-4"><div class="step-num">04</div><div class="step-name">Optimization &amp; Handoff</div></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ SCENE 7: PUNCHLINE — KINETIC TYPE + ORBITING SHARDS (14.857-16.657s) ============ -->
+      <section id="scene-punch" class="clip" data-start="14.857" data-duration="1.8" data-track-index="0">
+        <img class="punch-bg" id="punch-bg" src="assets/shots/01-hero.png" alt="">
+        <div class="punch-bg-overlay" id="punch-bg-overlay"></div>
+        <div class="caption" id="cap-punch" style="z-index: 22;"><span class="bar"></span><span class="txt mono">Real Site. Live Right Now.</span></div>
+        <svg id="orbit-punch" class="orbit-svg spin-el" width="800" height="800" viewBox="0 0 800 800" style="left:50%; top:50%; transform:translate(-50%,-50%);">
+          <g id="orbit-punch-spin" style="transform-origin: 400px 400px;">
+            <polygon points="400,60 430,120 370,120" fill="#fb923c" opacity="0.85" />
+            <polygon points="700,600 670,660 730,660" fill="#f5f0e8" opacity="0.75" transform="rotate(150 700 630)" />
+            <polygon points="100,600 130,540 70,540" fill="#fb923c" opacity="0.75" transform="rotate(260 100 570)" />
+          </g>
+        </svg>
+      </section>
+
+      <!-- ============ SCENE 8: OUTRO (16.657-19.357s) ============ -->
+      <section id="scene-outro" class="clip" data-start="16.657" data-duration="2.7" data-track-index="0">
+        <svg id="outro-ring" class="spin-el" width="700" height="700" viewBox="0 0 700 700" style="left:50%; top:50%; transform:translate(-50%,-50%);">
+          <circle cx="350" cy="350" r="300" fill="none" stroke="#fb923c" stroke-width="2" stroke-dasharray="8 16" opacity="0.4" />
+        </svg>
+        <div id="outro-group">
+          <div id="outro-logo" class="display">ProjectsByAxy</div>
+          <div id="outro-tag" class="display">Shift Your Reality.</div>
+        </div>
+      </section>
+
+      <!-- ============ ALWAYS-ON GRIT/TRANSITION LAYERS ============ -->
+      <div id="vignette" class="clip" data-start="0" data-duration="19.357" data-track-index="0"></div>
+      <div id="grain" class="clip" data-start="0" data-duration="19.357" data-track-index="0"></div>
+      <div id="flash-r" class="clip" data-start="0" data-duration="19.357" data-track-index="0"></div>
+      <div id="flash-g" class="clip" data-start="0" data-duration="19.357" data-track-index="0"></div>
+      <div id="flash" class="clip" data-start="0" data-duration="19.357" data-track-index="0"></div>
+
+      <!-- ============ AUDIO ============ -->
+      <audio id="music" src="assets/music/akxneshiva.mp3" data-start="0" data-duration="19.357" data-track-index="20" data-automation="{&quot;version&quot;:1,&quot;lanes&quot;:[{&quot;target&quot;:&quot;volume&quot;,&quot;points&quot;:[{&quot;t&quot;:0,&quot;v&quot;:0.75},{&quot;t&quot;:4.8,&quot;v&quot;:0.75},{&quot;t&quot;:4.957,&quot;v&quot;:0.9},{&quot;t&quot;:19.0,&quot;v&quot;:0.9},{&quot;t&quot;:19.357,&quot;v&quot;:0}]}]}"></audio>
+
+      <audio id="sfx-cold" src="assets/sfx/glitch_002.ogg" data-start="0.05" data-duration="0.03" data-volume="0.5" data-track-index="21"></audio>
+      <audio id="sfx-hook" src="assets/sfx/error_005.ogg" data-start="1.357" data-duration="0.2" data-volume="0.35" data-track-index="21"></audio>
+      <audio id="sfx-drop" src="assets/sfx/impactSoft_heavy_000.ogg" data-start="4.957" data-duration="0.55" data-volume="0.6" data-track-index="21"></audio>
+      <audio id="sfx-punch" src="assets/sfx/impactSoft_heavy_003.ogg" data-start="14.857" data-duration="0.3" data-volume="0.5" data-track-index="21"></audio>
+      <audio id="sfx-outro" src="assets/sfx/impactBell_heavy_004.ogg" data-start="16.657" data-duration="0.3" data-volume="0.55" data-track-index="21"></audio>
+    </div>
+
+    <script>
+      var tl = gsap.timeline({ paused: true });
+
+      function bigHit(t) {
+        tl.set("#flash", { opacity: 0.9 }, t);
+        tl.to("#flash", { opacity: 0, duration: 0.07, ease: "power2.out" }, t + 0.01);
+        tl.set("#flash-r", { opacity: 0.5 }, t);
+        tl.set("#flash-g", { opacity: 0.5 }, t + 0.012);
+        tl.to("#flash-r", { opacity: 0, duration: 0.09 }, t + 0.02);
+        tl.to("#flash-g", { opacity: 0, duration: 0.09 }, t + 0.03);
+        tl.set("#root", { x: -14 }, t);
+        tl.to("#root", { x: 10, duration: 0.03, ease: "none" }, t + 0.035);
+        tl.to("#root", { x: -5, duration: 0.03, ease: "none" }, t + 0.072);
+        tl.to("#root", { x: 0, duration: 0.03, ease: "none" }, t + 0.109);
+      }
+      function softCut(t) {
+        tl.set("#flash", { opacity: 0.3 }, t);
+        tl.to("#flash", { opacity: 0, duration: 0.05, ease: "power2.out" }, t + 0.008);
+        tl.set("#flash-r", { opacity: 0.2 }, t);
+        tl.to("#flash-r", { opacity: 0, duration: 0.06 }, t + 0.015);
+      }
+      function pulse(sel, t) {
+        tl.to(sel, { scale: 1.045, duration: 0.07, ease: "power2.out" }, t)
+          .to(sel, { scale: 1, duration: 0.09, ease: "power2.in" }, t + 0.07);
+      }
+      // continuous rotation across a scene's full duration — the core "real motion" primitive
+      function spin(sel, t, dur, fromDeg, toDeg) {
+        tl.fromTo(sel, { rotation: fromDeg }, { rotation: toDeg, duration: dur, ease: "none" }, t);
+      }
+      // repeated node pulse across a scene's duration
+      function nodePulse(sel, t, cycleDur, cycles) {
+        for (var i = 0; i < cycles; i++) {
+          var ct = t + i * cycleDur;
+          tl.to(sel, { scale: 1.3, duration: cycleDur * 0.4, ease: "sine.out" }, ct)
+            .to(sel, { scale: 1, duration: cycleDur * 0.6, ease: "sine.in" }, ct + cycleDur * 0.4);
+        }
+      }
+      // traveling energy pulse along a dashed path, looping for the scene's duration
+      function travelPulse(sel, t, dur, passes) {
+        var passDur = dur / passes;
+        for (var i = 0; i < passes; i++) {
+          tl.fromTo(sel, { strokeDashoffset: 224 }, { strokeDashoffset: -224, duration: passDur, ease: "none" }, t + i * passDur);
+        }
+      }
+
+      /* ===================== BACKGROUND GRID — continuous scroll for the whole video ===================== */
+      tl.fromTo("#bg-grid", { backgroundPosition: "0px 0px" }, { backgroundPosition: "672px 672px", duration: 19.357, ease: "none" }, 0);
+
+      /* ===================== SCENE 1: COLD OPEN (0-1.357s) ===================== */
+      bigHit(0.05);
+      tl.set("#cold-mark", { opacity: 1 }, 0.05);
+      tl.to("#cold-mark", { opacity: 0.15, duration: 0.03 }, 0.12);
+      tl.to("#cold-mark", { opacity: 1, duration: 0.03 }, 0.16);
+      tl.to("#cold-mark", { opacity: 0.2, duration: 0.03 }, 0.32);
+      tl.to("#cold-mark", { opacity: 1, duration: 0.03 }, 0.38);
+      tl.to("#cold-mark", { opacity: 1, duration: 0.1 }, 0.6);
+
+      /* ===================== SCENE 2: HOOK — KINETIC TYPE + ORBITING SHARDS (1.357-4.957s) ===================== */
+      bigHit(1.357);
+      tl.fromTo("#orbit-hook", { opacity: 0 }, { opacity: 1, duration: 0.2 }, 1.4);
+      spin("#orbit-hook-spin", 1.357, 3.6, 0, 55);
+      tl.fromTo("#hook-small", { opacity: 0, y: 10 }, { opacity: 1, y: 0, duration: 0.15, ease: "power3.out" }, 1.42);
+      tl.fromTo("#hook-big", { opacity: 0, scale: 1.1, y: 20 }, { opacity: 1, scale: 1, y: 0, duration: 0.18, ease: "expo.out" }, 1.6);
+      pulse("#hook-big", 2.557);
+      pulse("#hook-big", 3.457);
+      tl.to("#hook-small", { opacity: 0, duration: 0.06 }, 4.9);
+      tl.to("#hook-big", { opacity: 0, duration: 0.06 }, 4.9);
+      tl.to("#orbit-hook", { opacity: 0, duration: 0.1 }, 4.85);
+
+      /* ===================== SCENE 3: THE DROP — REAL HERO VIDEO (4.957-7.357s) ===================== */
+      bigHit(4.957);
+      tl.fromTo("#hero-video", { opacity: 0 }, { opacity: 0.75, duration: 0.15, ease: "power2.out" }, 4.957);
+      tl.fromTo("#hero-video-overlay", { opacity: 0 }, { opacity: 1, duration: 0.15, ease: "power2.out" }, 4.957);
+      tl.fromTo("#glow-hero", { opacity: 0 }, { opacity: 1, duration: 0.2, ease: "power2.out" }, 4.967);
+      tl.set("#hero-ring", { opacity: 0, rotation: 0 }, 4.957);
+      tl.fromTo("#hero-ring", { opacity: 0 }, { opacity: 1, duration: 0.25 }, 5.0);
+      spin("#hero-ring", 4.957, 2.4, 0, 40);
+      tl.fromTo("#wordmark", { opacity: 0, scale: 1.15 }, { opacity: 1, scale: 1, duration: 0.14, ease: "expo.out" }, 5.0);
+      tl.fromTo("#wordmark-sub", { opacity: 0, y: 10 }, { opacity: 1, y: 0, duration: 0.15, ease: "power3.out" }, 5.15);
+      pulse("#wordmark", 5.557);
+      pulse("#wordmark", 6.157);
+
+      /* ===================== SCENE 4: NETWORK — ILLUSTRATED, CONTINUOUS PULSE (7.357-10.057s) ===================== */
+      softCut(7.357);
+      tl.fromTo("#network-svg", { opacity: 0 }, { opacity: 1, duration: 0.16 }, 7.357);
+      tl.fromTo("#network-label", { opacity: 0, y: 12 }, { opacity: 1, y: 0, duration: 0.18, ease: "power3.out" }, 7.5);
+      nodePulse("#node-2", 7.5, 0.6, 4);
+      nodePulse("#node-1", 7.65, 0.6, 4);
+      nodePulse("#node-3", 7.8, 0.6, 4);
+      travelPulse("#net-pulse-1", 7.4, 2.5, 3);
+      travelPulse("#net-pulse-2", 7.5, 2.5, 3);
+      travelPulse("#net-pulse-3", 7.6, 2.5, 3);
+      travelPulse("#net-pulse-4", 7.7, 2.5, 3);
+      tl.to("#network-svg", { opacity: 0, duration: 0.08 }, 9.97);
+      tl.to("#network-label", { opacity: 0, duration: 0.08 }, 9.97);
+
+      /* ===================== SCENE 5: SERVICES RING — ILLUSTRATED, CONTINUOUS ORBIT (10.057-12.457s) ===================== */
+      softCut(10.057);
+      tl.fromTo("#services-ring-svg", { opacity: 0, scale: 0.9 }, { opacity: 1, scale: 1, duration: 0.2, ease: "power3.out" }, 10.057);
+      spin("#services-marker-spin", 10.057, 2.4, 0, 400);
+      tl.fromTo("#ring-core", { opacity: 0 }, { opacity: 1, duration: 0.15 }, 10.2);
+      tl.fromTo(["#svc-1", "#svc-2", "#svc-3", "#svc-4", "#svc-5", "#svc-6"], { opacity: 0 }, { opacity: 1, duration: 0.12, stagger: 0.07 }, 10.3);
+      tl.to("#services-ring-svg", { opacity: 0, duration: 0.08 }, 12.37);
+      tl.to("#ring-core", { opacity: 0, duration: 0.08 }, 12.37);
+      tl.to(["#svc-1", "#svc-2", "#svc-3", "#svc-4", "#svc-5", "#svc-6"], { opacity: 0, duration: 0.08 }, 12.37);
+
+      /* ===================== SCENE 6: PROCESS STEPPER — ILLUSTRATED, CONTINUOUS TRAVEL (12.457-14.857s) ===================== */
+      softCut(12.457);
+      tl.fromTo("#stepper-title", { opacity: 0, y: -8 }, { opacity: 1, y: 0, duration: 0.14 }, 12.457);
+      tl.fromTo(["#step-1", "#step-2", "#step-3", "#step-4"], { opacity: 0.15 }, { opacity: 0.35, duration: 0.1 }, 12.5);
+      tl.fromTo("#stepper-dot", { x: 0 }, { x: 1360, duration: 2.1, ease: "none" }, 12.5);
+      tl.fromTo("#stepper-fill", { width: "0%" }, { width: "100%", duration: 2.1, ease: "none" }, 12.5);
+      tl.to("#step-1", { opacity: 1, duration: 0.15 }, 12.55);
+      tl.to("#step-2", { opacity: 1, duration: 0.15 }, 13.2);
+      tl.to("#step-3", { opacity: 1, duration: 0.15 }, 13.85);
+      tl.to("#step-4", { opacity: 1, duration: 0.15 }, 14.5);
+
+      /* ===================== SCENE 7: PUNCHLINE — REAL HERO FRAME + KINETIC TYPE + ORBITING SHARDS (14.857-16.657s) ===================== */
+      bigHit(14.857);
+      tl.set("#punch-bg", { opacity: 0, scale: 1.0 }, 14.857);
+      tl.fromTo("#punch-bg", { opacity: 0 }, { opacity: 1, duration: 0.2, ease: "power2.out" }, 14.857);
+      tl.to("#punch-bg", { scale: 1.06, duration: 1.8, ease: "none" }, 14.857);
+      tl.fromTo("#punch-bg-overlay", { opacity: 0 }, { opacity: 1, duration: 0.2, ease: "power2.out" }, 14.857);
+      tl.fromTo("#orbit-punch", { opacity: 0 }, { opacity: 1, duration: 0.15 }, 14.9);
+      spin("#orbit-punch-spin", 14.857, 1.8, 0, 35);
+      tl.fromTo("#cap-punch", { opacity: 0, x: -10 }, { opacity: 1, x: 0, duration: 0.15, ease: "power3.out" }, 15.0);
+
+      /* ===================== SCENE 8: OUTRO (16.657-19.357s) ===================== */
+      bigHit(16.657);
+      tl.set("#outro-ring", { opacity: 0, rotation: 0 }, 16.657);
+      tl.fromTo("#outro-ring", { opacity: 0 }, { opacity: 1, duration: 0.2 }, 16.7);
+      spin("#outro-ring", 16.657, 2.7, 0, 45);
+      tl.fromTo("#outro-group", { opacity: 0 }, { opacity: 1, duration: 0.01 }, 16.667);
+      tl.fromTo("#outro-logo", { opacity: 0, scale: 1.18 }, { opacity: 1, scale: 1, duration: 0.14, ease: "expo.out" }, 16.677);
+      tl.fromTo("#outro-tag", { opacity: 0, y: 10 }, { opacity: 1, y: 0, duration: 0.15, ease: "power3.out" }, 16.9);
+      tl.to("#outro-logo", { scale: 1.045, duration: 0.07, ease: "power2.out" }, 17.857)
+        .to("#outro-logo", { scale: 1, duration: 0.09, ease: "power2.in" }, 17.927);
+      bigHit(19.357);
+
+      window.__timelines["brag-true-motion"] = tl;
+    </script>
+  </body>
+</html>
