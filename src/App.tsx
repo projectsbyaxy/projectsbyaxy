@@ -23,7 +23,7 @@ import { supabase } from './lib/supabase';
 import type { Inquiry } from './lib/supabase';
 import {
   /* ── existing icons ── */
-  ArrowLeft, Cpu, Database, Zap, X, ExternalLink, ShieldCheck,
+  ArrowLeft, Cpu, X, ExternalLink, ShieldCheck, Orbit, ShoppingBag,
   /* ── new icons ── */
   Monitor, Brain, Palette, ShoppingCart, Video, BarChart3,
   Package, TrendingUp, Crown, Mail, Phone, MapPin, Send, Check,
@@ -70,43 +70,71 @@ const cardVariants = {
    DATA
    ═══════════════════════════════════════════════════════════════ */
 interface Project {
-  id: string; title: string; description: string; fullDescription: string;
-  tech: string[]; icon: ReactNode; imageUrl: string;
+  id: string; title: string; category: string;
+  url: string; domain: string;
+  description: string; fullDescription: string;
+  features: string[]; tags: string[];
+  icon: ReactNode; imageUrl: string;
   specs: { label: string; value: string }[];
 }
 
 const PROJECTS: Project[] = [
   {
-    id: "AX-04", title: "Bespoke Web Systems",
-    description: "Custom high-velocity web platforms engineered for scale and speed. Zero-latency architecture.",
-    fullDescription: "A comprehensive digital overhaul for enterprise partners, focusing on high-velocity performance and pixel-perfect aesthetics. Built with a zero-latency mindset using Next.js and custom neural caching layers. We engineered a system that handles 1M+ concurrent users while maintaining sub-100ms response times globally.",
-    tech: ["Next.js", "AI-Core", "Scale"], icon: <Cpu size={20} />,
-    imageUrl: "https://images.unsplash.com/photo-1460925895917-afdab827c52f?auto=format&fit=crop&q=80&w=1200",
+    id: "AX-01", title: "AstroScroll", category: "AI Astrology SaaS",
+    url: "https://www.astroscroll.app", domain: "astroscroll.app",
+    description: "AI prediction platform that cross-checks seven astrological systems and returns one structured, confidence-scored verdict.",
+    fullDescription: "AstroScroll turns one question and your birth details into a structured reading. Seven astrological systems — including KP, Vedic, Western, Naadi, Prashna Shastra and Tarot — are read side by side, stress-tested by a red-team risk layer, and unified into a single final verdict with Dasha and transit timing, actionable remedies and a confidence score. Visitors can see transparent pricing and try a free reading without signing up.",
+    features: [
+      "7 astrological systems, one unified verdict",
+      "Dasha & transit timing on every reading",
+      "Red-team risk layer before the verdict",
+      "Confidence-scored, structured output",
+      "Birth chart engine from exact birth data",
+      "1 free reading — no sign-up needed",
+    ],
+    tags: ["AI", "SaaS", "Astrology"], icon: <Orbit size={20} />,
+    imageUrl: "/projects/astroscroll.webp",
     specs: [
-      { label: "Performance", value: "99/100 Lighthouse" }, { label: "Scale", value: "Enterprise Grade" },
-      { label: "Logic", value: "Neural Caching" }, { label: "Uptime", value: "99.99% Node-Locked" }
+      { label: "Type", value: "AI Prediction SaaS" }, { label: "Systems", value: "7 Cross-Checked" },
+      { label: "Output", value: "Confidence-Scored Verdict" }, { label: "Access", value: "Free Reading, No Sign-Up" }
     ]
   },
   {
-    id: "AX-09", title: "Predictive Ops",
-    description: "Real-time anomaly detection for industrial supply chains using transformer architectures.",
-    fullDescription: "Leveraging state-of-the-art transformer architectures to predict supply chain bottlenecks before they happen. Integrating edge computing for instantaneous anomaly detection across thousands of IoT sensors. This project reduced operational downtime by 43% for our industrial partners through proactive neural rerouting.",
-    tech: ["RNN", "Cloud-Native", "Edge"], icon: <Zap size={20} />,
-    imageUrl: "https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&q=80&w=1200",
+    id: "AX-02", title: "Alviora", category: "D2C E-Commerce",
+    url: "https://alviora.vercel.app", domain: "alviora.vercel.app",
+    description: "Boutique storefront for a handmade crochet brand — bags, accessories and decor, with category browsing, quick view and cart.",
+    fullDescription: "Alviora is a direct-to-consumer store for handmade crochet — bags, phone and camera cases, eyewear covers, jewellery, keychains and decor. The storefront pairs a warm boutique aesthetic with practical shopping: a full catalogue filterable across 16 categories, product search, quick-view details, a shopping cart, currency switching and a light/dark theme.",
+    features: [
+      "Catalogue filterable across 16 categories",
+      "Product search & quick-view details",
+      "Shopping cart built into the storefront",
+      "Currency switcher",
+      "Light / dark theme toggle",
+    ],
+    tags: ["E-Commerce", "D2C", "Handmade"], icon: <ShoppingBag size={20} />,
+    imageUrl: "/projects/alviora.webp",
     specs: [
-      { label: "Architecture", value: "Transformer Layout" }, { label: "Latency", value: "<15ms Inference" },
-      { label: "Nodes", value: "12,000+ Edge Devices" }, { label: "Security", value: "End-to-End Encrypted" }
+      { label: "Type", value: "D2C Storefront" }, { label: "Catalogue", value: "16 Categories" },
+      { label: "Shopping", value: "Search · Quick View · Cart" }, { label: "Extras", value: "Currency · Dark Mode" }
     ]
   },
   {
-    id: "AX-12", title: "Auto-Content",
-    description: "Generative AI workflow automation for global marketing teams. Reduced latency by 60%.",
-    fullDescription: "Revolutionizing marketing workflows with custom-trained Stable Diffusion models and GPT-O1 agents. Automating content creation cycles from 48 hours down to seconds. We developed a proprietary prompt-engineering layer that ensures brand consistency across millions of generated assets, saving over 5,000 man-hours monthly.",
-    tech: ["Stable-Diffusion", "GPT-O1", "Nodes"], icon: <Database size={20} />,
-    imageUrl: "https://images.unsplash.com/photo-1677442136019-21780ecad995?auto=format&fit=crop&q=80&w=1200",
+    id: "AX-03", title: "Bristidhara", category: "Artist Portfolio",
+    url: "https://bristidhara.vercel.app", domain: "bristidhara.vercel.app",
+    description: "Gothic-styled portfolio for an illustrator — a filterable gallery of 30+ works, commission tiers and a built-in enquiry form.",
+    fullDescription: "A portfolio for Bristidhara, an illustrator of dark fantasy, gothic flora and character design. The site sets her work inside a moody blackletter-and-chrome world: featured pieces up front, a gallery of 30+ illustrations filterable by category, an about section, three commission tiers with turnaround times, and a contact form that captures project type and brief.",
+    features: [
+      "Featured works showcase",
+      "Gallery of 30+ pieces with category filters",
+      "3 commission tiers with turnaround times",
+      "Enquiry form with project type & brief",
+      "Instagram & Behance links",
+    ],
+    tags: ["Portfolio", "Illustration", "Commissions"], icon: <Palette size={20} />,
+    imageUrl: "/projects/bristidhara.webp",
     specs: [
-      { label: "Model", value: "GPT-O1 Hybrid" }, { label: "Throughput", value: "10k assets/hr" },
-      { label: "Accuracy", value: "98.2% Brand Match" }, { label: "Pipeline", value: "Automated V-Ring" }
+      { label: "Type", value: "Illustrator Portfolio" }, { label: "Gallery", value: "30+ Works · Filters" },
+      { label: "Commissions", value: "3 Tiers" }, { label: "Contact", value: "Enquiry Form" }
     ]
   }
 ];
@@ -1441,17 +1469,17 @@ export default function App() {
             </motion.div>
 
             <motion.div variants={itemVariants} className="lg:absolute lg:bottom-0 lg:left-0 mt-16 lg:mt-0 max-w-sm w-full bg-white/[0.03] backdrop-blur-xl border border-white/10 p-6 rounded-2xl flex flex-col sm:flex-row gap-6 items-center">
-              <div className="w-24 h-24 bg-gradient-to-br from-orange-400/20 to-transparent border border-white/5 rounded-lg overflow-hidden shrink-0">
-                <img src="https://images.unsplash.com/photo-1550751827-4bd374c3f58b?auto=format&fit=crop&q=80&w=200&h=200" alt="Neural Core" className="w-full h-full object-cover opacity-60 mix-blend-overlay" referrerPolicy="no-referrer" />
+              <div className="w-24 h-24 border border-white/10 rounded-lg overflow-hidden shrink-0">
+                <img src={PROJECTS[0].imageUrl} alt={`${PROJECTS[0].title} homepage`} className="w-full h-full object-cover" />
               </div>
               <div className="flex flex-col gap-3">
                 <div className="text-[10px] font-mono text-orange-400/80 tracking-[0.2em] uppercase">
-                  AX-01: <span className="text-white">DIGITAL CORE</span>
+                  {PROJECTS[0].id}: <span className="text-white">{PROJECTS[0].title}</span>
                 </div>
                 <p className="text-[11px] text-white/50 leading-relaxed font-light">
-                  Custom high-velocity web platform engineered for enterprise scale and speed.
+                  AI astrology platform — seven systems, one confidence-scored verdict.
                 </p>
-                <button onClick={() => scrollTo("projects")} className="w-full sm:w-auto px-4 py-2 bg-white/5 border border-white/10 rounded text-[9px] uppercase tracking-[0.2em] font-mono hover:bg-white hover:text-black transition-all">
+                <button onClick={() => setSelectedProject(PROJECTS[0])} className="w-full sm:w-auto px-4 py-2 bg-white/5 border border-white/10 rounded text-[9px] uppercase tracking-[0.2em] font-mono hover:bg-white hover:text-black transition-all">
                   View Project
                 </button>
               </div>
@@ -1505,18 +1533,13 @@ export default function App() {
               <motion.div variants={itemVariants} className="flex items-center gap-4 sm:gap-6 text-[9px] sm:text-[10px] uppercase tracking-[0.15em] sm:tracking-[0.2em] font-mono text-white/60">
                 <span className="whitespace-nowrap">Filter: All</span>
                 <div className="w-[1px] h-4 bg-white/20" />
-                <span className="whitespace-nowrap">2024-2025</span>
+                <span className="whitespace-nowrap">{PROJECTS.length} Live Builds</span>
               </motion.div>
             </div>
 
             <motion.div variants={containerVariants} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
               {PROJECTS.map((project) => (
-                <ProjectCard
-                  key={project.id}
-                  id={project.id} title={project.title} description={project.description}
-                  tech={project.tech} icon={project.icon}
-                  onClick={() => setSelectedProject(project)}
-                />
+                <ProjectCard key={project.id} project={project} onClick={() => setSelectedProject(project)} />
               ))}
             </motion.div>
 
@@ -1681,27 +1704,52 @@ function TestimonialCard({ quote, author, role, id }: { quote: string; author: s
   );
 }
 
-interface ProjectCardProps { id: string; title: string; description: string; tech: string[]; icon: ReactNode; onClick?: () => void; }
+interface ProjectCardProps { project: Project; onClick?: () => void; }
 
-const ProjectCard: React.FC<ProjectCardProps> = ({ id, title, description, tech, icon, onClick }) => (
+const ProjectCard: React.FC<ProjectCardProps> = ({ project, onClick }) => (
   <motion.div
     variants={{ hidden: { opacity: 0, y: 30, filter: "blur(10px)" }, visible: { opacity: 1, y: 0, filter: "blur(0px)", transition: { duration: 1, ease: [0.16, 1, 0.3, 1] } } }}
     whileHover={{ scale: 1.02, y: -8, boxShadow: "0 20px 40px rgba(0,0,0,0.4), 0 0 20px rgba(255,255,255,0.05)", borderColor: "rgba(255,255,255,0.2)" }}
     onClick={onClick}
-    className="group flex flex-col gap-6 p-8 border border-white/5 bg-white/[0.03] backdrop-blur-sm transition-all duration-500 rounded-sm cursor-pointer"
+    className="group flex flex-col border border-white/5 bg-white/[0.03] backdrop-blur-sm transition-all duration-500 rounded-sm cursor-pointer overflow-hidden"
   >
-    <div className="flex justify-between items-start">
-      <div className="text-[10px] font-mono text-white/20 tracking-widest">{id}</div>
-      <div className="text-white/30 group-hover:text-white transition-colors duration-500">{icon}</div>
+    <div className="relative aspect-[16/10] overflow-hidden border-b border-white/5">
+      <img
+        src={project.imageUrl} alt={`${project.title} homepage`} loading="lazy"
+        className="w-full h-full object-cover object-top transition-transform duration-700 group-hover:scale-105"
+      />
+      <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
+      <span className="absolute top-3 left-3 text-[9px] uppercase tracking-[0.2em] font-mono px-2 py-1 bg-black/60 backdrop-blur-sm border border-white/10 text-white/70">
+        {project.category}
+      </span>
     </div>
-    <div className="flex flex-col gap-2">
-      <h3 className="font-display text-xl uppercase tracking-widest font-medium text-white/90 group-hover:text-white transition-colors">{title}</h3>
-      <p className="text-[12px] leading-relaxed text-white/50 group-hover:text-white/70 transition-colors font-light tracking-wide">{description}</p>
-    </div>
-    <div className="flex flex-wrap gap-3 mt-auto">
-      {tech.map((t) => (
-        <span key={t} className="text-[9px] uppercase tracking-widest font-mono px-2 py-1 bg-white/5 text-white/30 group-hover:text-white/60 transition-colors">{t}</span>
-      ))}
+    <div className="flex flex-col gap-5 p-7 flex-1">
+      <div className="flex justify-between items-start">
+        <div className="text-[10px] font-mono text-white/20 tracking-widest">{project.id}</div>
+        <div className="text-white/30 group-hover:text-white transition-colors duration-500">{project.icon}</div>
+      </div>
+      <div className="flex flex-col gap-2">
+        <h3 className="font-display text-xl uppercase tracking-widest font-medium text-white/90 group-hover:text-white transition-colors">{project.title}</h3>
+        <p className="text-[12px] leading-relaxed text-white/50 group-hover:text-white/70 transition-colors font-light tracking-wide">{project.description}</p>
+      </div>
+      <ul className="flex flex-col gap-2">
+        {project.features.slice(0, 4).map((f) => (
+          <li key={f} className="flex items-start gap-2.5 text-[11px] leading-snug text-white/45 font-light">
+            <Check size={11} className="mt-0.5 shrink-0 text-orange-400/70" />
+            {f}
+          </li>
+        ))}
+      </ul>
+      <div className="mt-auto pt-4 border-t border-white/5 flex items-center justify-between gap-3">
+        <a
+          href={project.url} target="_blank" rel="noopener noreferrer"
+          onClick={(e) => e.stopPropagation()}
+          className="flex items-center gap-1.5 text-[10px] uppercase tracking-[0.15em] font-mono text-orange-400/80 hover:text-orange-300 transition-colors truncate"
+        >
+          {project.domain} <ExternalLink size={11} className="shrink-0" />
+        </a>
+        <span className="shrink-0 text-[9px] uppercase tracking-[0.2em] font-mono text-white/30 group-hover:text-white/60 transition-colors">Details →</span>
+      </div>
     </div>
   </motion.div>
 );
@@ -1721,7 +1769,7 @@ function ProjectModal({ project, onClose }: { project: Project; onClose: () => v
           <X size={20} className="group-hover:scale-110 transition-transform" />
         </button>
         <div className="w-full md:w-1/2 h-64 md:h-auto relative overflow-hidden group">
-          <img src={project.imageUrl} alt={project.title} className="w-full h-full object-cover grayscale opacity-60 group-hover:grayscale-0 group-hover:opacity-100 transition-all duration-1000 scale-105 group-hover:scale-100" referrerPolicy="no-referrer" />
+          <img src={project.imageUrl} alt={`${project.title} homepage`} className="w-full h-full object-cover object-top transition-transform duration-1000 scale-105 group-hover:scale-100" />
           <div className="absolute inset-0 bg-gradient-to-t md:bg-gradient-to-r from-black via-transparent to-transparent opacity-60" />
           <div className="absolute bottom-8 left-8 flex items-center gap-3">
             <div className="p-3 bg-white/10 backdrop-blur-md rounded-xl border border-white/20 text-white">{project.icon}</div>
@@ -1734,13 +1782,24 @@ function ProjectModal({ project, onClose }: { project: Project; onClose: () => v
         <div className="w-full md:w-1/2 p-8 md:p-12 overflow-y-auto flex flex-col gap-10">
           <div className="flex flex-col gap-4">
             <div className="flex items-center gap-2 text-[10px] font-mono text-orange-400/80 tracking-[0.4em] uppercase">
-              <ShieldCheck size={12} /> Verification_Active
+              <ShieldCheck size={12} /> Live // {project.category}
             </div>
             <h2 className="font-display text-3xl md:text-4xl lg:text-5xl uppercase tracking-widest leading-tight">{project.title}</h2>
           </div>
           <div className="flex flex-col gap-6">
             <div className="text-[10px] uppercase tracking-[0.3em] font-mono text-white/20">Abstract // Summary</div>
-            <p className="text-sm md:text-base text-white/60 leading-relaxed font-light tracking-wide italic">"{project.fullDescription}"</p>
+            <p className="text-sm md:text-base text-white/60 leading-relaxed font-light tracking-wide">{project.fullDescription}</p>
+          </div>
+          <div className="flex flex-col gap-4">
+            <div className="text-[10px] uppercase tracking-[0.3em] font-mono text-white/20">Key Features //</div>
+            <ul className="flex flex-col gap-2.5">
+              {project.features.map((f) => (
+                <li key={f} className="flex items-start gap-3 text-[12px] text-white/60 font-light">
+                  <Check size={12} className="mt-0.5 shrink-0 text-orange-400/80" />
+                  {f}
+                </li>
+              ))}
+            </ul>
           </div>
           <div className="flex flex-col gap-6">
             <div className="text-[10px] uppercase tracking-[0.3em] font-mono text-white/20">Operational Specs //</div>
@@ -1754,11 +1813,14 @@ function ProjectModal({ project, onClose }: { project: Project; onClose: () => v
             </div>
           </div>
           <div className="mt-auto pt-8 flex flex-wrap gap-4 items-center">
-            <button className="flex-1 px-8 py-4 bg-white text-black text-[11px] uppercase tracking-[0.4em] font-mono font-bold hover:bg-white/90 transition-all flex items-center justify-center gap-3 group">
-              Launch Instance <ExternalLink size={14} className="group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform" />
-            </button>
+            <a
+              href={project.url} target="_blank" rel="noopener noreferrer"
+              className="flex-1 px-8 py-4 bg-white text-black text-[11px] uppercase tracking-[0.4em] font-mono font-bold hover:bg-white/90 transition-all flex items-center justify-center gap-3 group"
+            >
+              Launch Live Site <ExternalLink size={14} className="group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform" />
+            </a>
             <div className="flex gap-2">
-              {project.tech.map(t => (
+              {project.tags.map(t => (
                 <span key={t} className="px-3 py-1.5 border border-white/10 rounded text-[9px] font-mono text-white/30 uppercase tracking-widest">{t}</span>
               ))}
             </div>
@@ -2467,7 +2529,7 @@ function AdminPanel({ onExit }: { onExit: () => void }) {
                         <div className={`${M} text-white/20 mt-1`}>{p.description.slice(0, 70)}...</div>
                       </div>
                       <div className="flex gap-1.5 flex-wrap justify-end shrink-0">
-                        {p.tech.map(t => <span key={t} className={`${M} text-[8px] px-2 py-1 border border-white/[0.06] text-white/20`}>{t}</span>)}
+                        {p.tags.map(t => <span key={t} className={`${M} text-[8px] px-2 py-1 border border-white/[0.06] text-white/20`}>{t}</span>)}
                       </div>
                     </motion.div>
                   ))}
