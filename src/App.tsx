@@ -220,7 +220,7 @@ const PROCESS_PHASES = [
 const PRICING_TIERS = [
   {
     id: "AX-P1", name: "STARTER", label: "Launch Grade",
-    weekly: "₹6,250", weeklyUsd: "$75", popular: false,
+    price: "₹24,999", priceUsd: "$259", weekly: false, popular: false,
     description: "Ideal for first-time founders establishing their digital presence and brand.",
     icon: <Package size={18} />,
     features: [
@@ -231,7 +231,7 @@ const PRICING_TIERS = [
   },
   {
     id: "AX-P2", name: "GROWTH", label: "Market Ready",
-    weekly: "₹12,500", weeklyUsd: "$150", popular: true,
+    price: "₹14,999", priceUsd: "$156", weekly: true, popular: true,
     description: "For brands ready to scale with AI-powered automation and full-stack presence.",
     icon: <TrendingUp size={18} />,
     features: [
@@ -243,7 +243,7 @@ const PRICING_TIERS = [
   },
   {
     id: "AX-P3", name: "DOMINATION", label: "Enterprise Tier",
-    weekly: "₹18,750", weeklyUsd: "$225", popular: false,
+    price: "₹24,999", priceUsd: "$259", weekly: true, popular: false,
     description: "Complete brand ecosystem for operators demanding absolute market control.",
     icon: <Crown size={18} />,
     features: [
@@ -883,15 +883,14 @@ function PricingSection({ scrollTo }: { scrollTo: (id: string) => void }) {
               <div className="flex flex-col gap-1.5 border-y border-white/5 py-6">
                 <div className="flex items-baseline gap-2">
                   <span className={`font-display text-4xl font-medium tracking-tight ${tier.popular ? "text-white" : "text-white/70"}`}>
-                    {tier.weekly}
+                    {tier.price}
                   </span>
-                  <span className="text-[11px] font-mono uppercase tracking-widest text-white/40">/ week</span>
-                </div>
-                <div className="text-[10px] font-mono text-white/45 tracking-widest">
-                  4 weekly payments
+                  <span className="text-[11px] font-mono uppercase tracking-widest text-white/40">
+                    {tier.weekly ? "/ week" : "one-time"}
+                  </span>
                 </div>
                 <div className="text-[10px] font-mono text-white/25 tracking-widest">
-                  {tier.weeklyUsd} USD / week
+                  {tier.priceUsd} USD{tier.weekly ? " / week" : ""}
                 </div>
               </div>
 
@@ -949,9 +948,9 @@ const SERVICE_OPTIONS = [
 type ServiceId = typeof SERVICE_OPTIONS[number]["id"];
 
 const PACKAGE_TIERS = [
-  { id: "STARTER",     label: "STARTER — ₹6,250/wk × 4 weeks" },
-  { id: "GROWTH",      label: "GROWTH — ₹12,500/wk × 4 weeks" },
-  { id: "DOMINATION",  label: "DOMINATION — ₹18,750/wk × 4 weeks" },
+  { id: "STARTER",     label: "STARTER — ₹24,999" },
+  { id: "GROWTH",      label: "GROWTH — ₹14,999/wk" },
+  { id: "DOMINATION",  label: "DOMINATION — ₹24,999/wk" },
 ] as const;
 
 type PackageId = typeof PACKAGE_TIERS[number]["id"] | "";
