@@ -13,7 +13,6 @@
  *  Process         — 4-phase workflow             [NEW]
  *  Projects        — deployed project cards       [ORIGINAL — untouched]
  *  Pricing         — 3 package tiers              [NEW]
- *  Network Feedback — testimonials                [ORIGINAL — untouched]
  *  Contact         — intake form + info           [NEW]
  */
 
@@ -314,7 +313,6 @@ function NavBar({ scrollTo }: { scrollTo: (id: string) => void }) {
     { id: "process",      label: "Process" },
     { id: "projects",     label: "Projects" },
     { id: "pricing",      label: "Pricing" },
-    { id: "testimonials", label: "Feedback" },
     { id: "contact",      label: "Contact" },
   ];
 
@@ -1553,46 +1551,6 @@ export default function App() {
         {/* ══ PRICING (NEW) ════════════════════════════════════════ */}
         <PricingSection scrollTo={scrollTo} />
 
-        {/* ══ NETWORK FEEDBACK (ORIGINAL — UNTOUCHED) ═════════════ */}
-        <section
-          id="testimonials"
-          className="min-h-screen w-full flex flex-col items-center justify-center p-6 sm:p-12 bg-black border-t border-white/5"
-        >
-          <motion.div
-            variants={containerVariants}
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true, margin: "-100px" }}
-            className="max-w-4xl w-full flex flex-col gap-16 py-12"
-          >
-            <div className="flex flex-col gap-6 border-b border-white/10 pb-12">
-              <motion.button variants={itemVariants} onClick={() => scrollTo("hero")} className="flex items-center gap-2 text-[10px] uppercase tracking-[0.3em] font-mono text-white/40 hover:text-white transition-colors self-start">
-                <ArrowLeft size={12} /> Back to Top
-              </motion.button>
-              <div className="flex flex-col gap-3">
-                <motion.h2 variants={titleLineVariants} className="font-display font-medium text-3xl sm:text-4xl tracking-[0.1em] sm:tracking-widest uppercase">
-                  Network Feedback //
-                </motion.h2>
-                <motion.p variants={itemVariants} className="text-white/40 text-[11px] sm:text-[12px] uppercase tracking-[0.15em] sm:tracking-[0.2em] font-mono">
-                  Verifications from Industry Leaders
-                </motion.p>
-              </div>
-            </div>
-
-            <div className="flex flex-col gap-12">
-              <TestimonialCard quote="ProjectsByAxy transformed our legacy data pipeline into a real-time neural engine. The speed of iteration was unprecedented." author="Marcus Thorne" role="CTO, Flux Dynamics" id="VR-012" />
-              <TestimonialCard quote="The V2 deployment exceeded our expectations for search accuracy. A true shift in our digital core." author="Sarah Jenkins" role="Lead AI Architect, NeoSystems" id="VR-084" />
-              <TestimonialCard quote="Precision, high-velocity delivery, and absolute clarity. The team at Axy doesn't just build, they architect futures." author="Elena Vance" role="CEO, Astral Tech" id="VR-103" />
-            </div>
-
-            <motion.div variants={itemVariants} className="text-center pt-8">
-              <div className="inline-block px-6 py-2 border border-white/5 rounded-full text-[9px] uppercase tracking-[0.3em] font-mono text-white/20">
-                Encrypted Feedback Channel // Secure
-              </div>
-            </motion.div>
-          </motion.div>
-        </section>
-
         {/* ══ CONTACT (NEW) ════════════════════════════════════════ */}
         <ContactSection scrollTo={scrollTo} />
 
@@ -1680,26 +1638,6 @@ function SpecRow({ label, value }: { label: string; value: string }) {
         {value}
       </span>
     </div>
-  );
-}
-
-function TestimonialCard({ quote, author, role, id }: { quote: string; author: string; role: string; id: string }) {
-  return (
-    <motion.div
-      variants={{ hidden: { opacity: 0, y: 20, filter: "blur(8px)" }, visible: { opacity: 1, y: 0, filter: "blur(0px)", transition: { duration: 1, ease: [0.16, 1, 0.3, 1] } } }}
-      whileHover={{ scale: 1.015, backgroundColor: "rgba(255,255,255,0.02)" }}
-      className="group relative flex flex-col gap-6 p-8 border-l border-white/10 hover:border-white/60 transition-all duration-500 cursor-default"
-    >
-      <div className="absolute top-0 left-[-1px] w-[2px] h-0 bg-white group-hover:h-full transition-all duration-500 shadow-[0_0_10px_rgba(255,255,255,0.8)]" />
-      <div className="text-[10px] font-mono text-white/20 tracking-[0.4em]">{id} // IDENTITY_VERIFIED</div>
-      <p className="font-display text-lg md:text-xl text-white/90 leading-relaxed italic tracking-wide group-hover:text-white transition-colors">
-        "{quote}"
-      </p>
-      <div className="flex flex-col gap-1">
-        <span className="text-[11px] uppercase tracking-[0.3em] font-mono text-white/70">{author}</span>
-        <span className="text-[9px] uppercase tracking-[0.2em] font-mono text-white/30">{role}</span>
-      </div>
-    </motion.div>
   );
 }
 
