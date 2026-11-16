@@ -1351,7 +1351,6 @@ function ContactSection({ scrollTo }: { scrollTo: (id: string) => void }) {
    ═══════════════════════════════════════════════════════════════ */
 export default function App() {
   const [isLoading, setIsLoading] = useState(false);
-  const [selectedProject, setSelectedProject] = useState<Project | null>(null);
   const [showAdmin, setShowAdmin] = useState(() => window.location.hash === "#admin");
 
   useEffect(() => {
@@ -1464,23 +1463,6 @@ export default function App() {
               </div>
             </motion.div>
 
-            <motion.div variants={itemVariants} className="lg:absolute lg:bottom-0 lg:left-0 mt-16 lg:mt-0 max-w-sm w-full bg-white/[0.03] backdrop-blur-xl border border-white/10 p-6 rounded-2xl flex flex-col sm:flex-row gap-6 items-center">
-              <div className="w-24 h-24 border border-white/10 rounded-lg overflow-hidden shrink-0">
-                <img src={PROJECTS[0].imageUrl} alt={`${PROJECTS[0].title} homepage`} className="w-full h-full object-cover" />
-              </div>
-              <div className="flex flex-col gap-3">
-                <div className="text-[10px] font-mono text-orange-400/80 tracking-[0.2em] uppercase">
-                  {PROJECTS[0].id}: <span className="text-white">{PROJECTS[0].title}</span>
-                </div>
-                <p className="text-[11px] text-white/50 leading-relaxed font-light">
-                  AI astrology platform — seven systems, one confidence-scored verdict.
-                </p>
-                <button onClick={() => setSelectedProject(PROJECTS[0])} className="w-full sm:w-auto px-4 py-2 bg-white/5 border border-white/10 rounded text-[9px] uppercase tracking-[0.2em] font-mono hover:bg-white hover:text-black transition-all">
-                  View Project
-                </button>
-              </div>
-            </motion.div>
-
             <motion.div variants={itemVariants} className="lg:absolute lg:bottom-0 lg:right-0 lg:mb-2 mt-12 lg:mt-0 flex flex-wrap justify-center lg:justify-end items-center gap-3">
               {["AI-POWERED", "D2C READY", "FULL-STACK", "BRAND-FIRST"].map((badge) => (
                 <div key={badge} className="px-4 py-1.5 border border-white/10 rounded-full text-[9px] uppercase tracking-[0.25em] font-mono text-white/40 hover:text-white hover:border-white/40 transition-all cursor-default">
@@ -1566,13 +1548,6 @@ export default function App() {
         )}
       </AnimatePresence>
 
-      {/* ── PROJECT MODAL (ORIGINAL — UNTOUCHED) ── */}
-      <AnimatePresence>
-        {selectedProject && (
-          <ProjectModal project={selectedProject} onClose={() => setSelectedProject(null)} />
-        )}
-      </AnimatePresence>
-
     </div>
   );
 }
@@ -1590,83 +1565,6 @@ function SpecRow({ label, value }: { label: string; value: string }) {
         {value}
       </span>
     </div>
-  );
-}
-
-function ProjectModal({ project, onClose }: { project: Project; onClose: () => void }) {
-  return (
-    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-[110] flex items-center justify-center p-4 sm:p-8">
-      <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={onClose} className="absolute inset-0 bg-black/90 backdrop-blur-2xl" />
-      <motion.div
-        initial={{ opacity: 0, scale: 0.95, y: 20, filter: "blur(10px)" }}
-        animate={{ opacity: 1, scale: 1, y: 0, filter: "blur(0px)" }}
-        exit={{ opacity: 0, scale: 0.95, y: 20, filter: "blur(10px)" }}
-        transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
-        className="relative w-full max-w-5xl max-h-[90vh] bg-black border border-white/10 rounded-2xl overflow-hidden flex flex-col md:flex-row shadow-[0_0_100px_rgba(0,0,0,1)]"
-      >
-        <button onClick={onClose} className="absolute top-6 right-6 z-20 p-2 bg-black/40 hover:bg-white hover:text-black rounded-full border border-white/10 transition-all group">
-          <X size={20} className="group-hover:scale-110 transition-transform" />
-        </button>
-        <div className="w-full md:w-1/2 h-64 md:h-auto relative overflow-hidden group">
-          <img src={project.imageUrl} alt={`${project.title} homepage`} className="w-full h-full object-cover object-top transition-transform duration-1000 scale-105 group-hover:scale-100" />
-          <div className="absolute inset-0 bg-gradient-to-t md:bg-gradient-to-r from-black via-transparent to-transparent opacity-60" />
-          <div className="absolute bottom-8 left-8 flex items-center gap-3">
-            <div className="p-3 bg-white/10 backdrop-blur-md rounded-xl border border-white/20 text-white">{project.icon}</div>
-            <div className="flex flex-col">
-              <span className="text-[10px] font-mono text-white/40 tracking-widest uppercase">Protocol</span>
-              <span className="text-sm font-mono text-white tracking-widest">{project.id}</span>
-            </div>
-          </div>
-        </div>
-        <div className="w-full md:w-1/2 p-8 md:p-12 overflow-y-auto flex flex-col gap-10">
-          <div className="flex flex-col gap-4">
-            <div className="flex items-center gap-2 text-[10px] font-mono text-orange-400/80 tracking-[0.4em] uppercase">
-              <ShieldCheck size={12} /> Live // {project.category}
-            </div>
-            <h2 className="font-display text-3xl md:text-4xl lg:text-5xl uppercase tracking-widest leading-tight">{project.title}</h2>
-          </div>
-          <div className="flex flex-col gap-6">
-            <div className="text-[10px] uppercase tracking-[0.3em] font-mono text-white/20">Abstract // Summary</div>
-            <p className="text-sm md:text-base text-white/60 leading-relaxed font-light tracking-wide">{project.fullDescription}</p>
-          </div>
-          <div className="flex flex-col gap-4">
-            <div className="text-[10px] uppercase tracking-[0.3em] font-mono text-white/20">Key Features //</div>
-            <ul className="flex flex-col gap-2.5">
-              {project.features.map((f) => (
-                <li key={f} className="flex items-start gap-3 text-[12px] text-white/60 font-light">
-                  <Check size={12} className="mt-0.5 shrink-0 text-orange-400/80" />
-                  {f}
-                </li>
-              ))}
-            </ul>
-          </div>
-          <div className="flex flex-col gap-6">
-            <div className="text-[10px] uppercase tracking-[0.3em] font-mono text-white/20">Operational Specs //</div>
-            <div className="grid grid-cols-2 gap-4">
-              {project.specs.map(spec => (
-                <div key={spec.label} className="p-4 border border-white/5 bg-white/[0.02] rounded-lg">
-                  <div className="text-[9px] uppercase tracking-widest text-white/30 mb-1">{spec.label}</div>
-                  <div className="text-[11px] font-mono text-white/80">{spec.value}</div>
-                </div>
-              ))}
-            </div>
-          </div>
-          <div className="mt-auto pt-8 flex flex-wrap gap-4 items-center">
-            <a
-              href={project.url} target="_blank" rel="noopener noreferrer"
-              className="flex-1 px-8 py-4 bg-white text-black text-[11px] uppercase tracking-[0.4em] font-mono font-bold hover:bg-white/90 transition-all flex items-center justify-center gap-3 group"
-            >
-              Launch Live Site <ExternalLink size={14} className="group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform" />
-            </a>
-            <div className="flex gap-2">
-              {project.tags.map(t => (
-                <span key={t} className="px-3 py-1.5 border border-white/10 rounded text-[9px] font-mono text-white/30 uppercase tracking-widest">{t}</span>
-              ))}
-            </div>
-          </div>
-        </div>
-      </motion.div>
-    </motion.div>
   );
 }
 
