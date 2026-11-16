@@ -11,7 +11,7 @@
  *  Services        — 6 service offerings          [NEW]
  *  About           — agency profile + stats       [NEW]
  *  Process         — 4-phase workflow             [NEW]
- *  Projects        — deployed project cards       [ORIGINAL — untouched]
+ *  (Projects section removed — hero still links AX-01 details)
  *  Pricing         — 3 package tiers              [NEW]
  *  Contact         — intake form + info           [NEW]
  */
@@ -311,7 +311,6 @@ function NavBar({ scrollTo }: { scrollTo: (id: string) => void }) {
     { id: "services",     label: "Services" },
     { id: "about",        label: "About" },
     { id: "process",      label: "Process" },
-    { id: "projects",     label: "Projects" },
     { id: "pricing",      label: "Pricing" },
     { id: "contact",      label: "Contact" },
   ];
@@ -1501,53 +1500,6 @@ export default function App() {
         {/* ══ PROCESS (NEW) ════════════════════════════════════════ */}
         <ProcessSection scrollTo={scrollTo} />
 
-        {/* ══ PROJECTS (ORIGINAL — UNTOUCHED) ═════════════════════ */}
-        <section
-          id="projects"
-          className="min-h-screen w-full flex flex-col items-center justify-center p-6 sm:p-12 bg-black/60 backdrop-blur-3xl border-t border-white/5"
-        >
-          <motion.div
-            variants={containerVariants}
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true, margin: "-100px" }}
-            className="max-w-5xl w-full flex flex-col gap-16 py-12"
-          >
-            <div className="flex flex-col md:flex-row md:items-end justify-between gap-8 border-b border-white/10 pb-12">
-              <div className="flex flex-col gap-6">
-                <motion.button variants={itemVariants} onClick={() => scrollTo("hero")} className="flex items-center gap-2 text-[10px] uppercase tracking-[0.3em] font-mono text-white/40 hover:text-white transition-colors self-start">
-                  <ArrowLeft size={12} /> Back to Top
-                </motion.button>
-                <div className="flex flex-col gap-3">
-                  <motion.h2 variants={titleLineVariants} className="font-display font-medium text-3xl sm:text-4xl tracking-[0.1em] sm:tracking-widest uppercase">
-                    Deployed Projects //
-                  </motion.h2>
-                  <motion.p variants={itemVariants} className="text-white/40 text-[11px] sm:text-[12px] uppercase tracking-[0.15em] sm:tracking-[0.2em] font-mono">
-                    Neural Deployments & Market Disruption
-                  </motion.p>
-                </div>
-              </div>
-              <motion.div variants={itemVariants} className="flex items-center gap-4 sm:gap-6 text-[9px] sm:text-[10px] uppercase tracking-[0.15em] sm:tracking-[0.2em] font-mono text-white/60">
-                <span className="whitespace-nowrap">Filter: All</span>
-                <div className="w-[1px] h-4 bg-white/20" />
-                <span className="whitespace-nowrap">{PROJECTS.length} Live Builds</span>
-              </motion.div>
-            </div>
-
-            <motion.div variants={containerVariants} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-              {PROJECTS.map((project) => (
-                <ProjectCard key={project.id} project={project} onClick={() => setSelectedProject(project)} />
-              ))}
-            </motion.div>
-
-            <motion.div variants={itemVariants} className="flex justify-center border-t border-white/5 pt-12">
-              <div className="text-[10px] uppercase tracking-[0.4em] text-white/20 font-mono">
-                [ End of Index — Request Full Portfolio ]
-              </div>
-            </motion.div>
-          </motion.div>
-        </section>
-
         {/* ══ PRICING (NEW) ════════════════════════════════════════ */}
         <PricingSection scrollTo={scrollTo} />
 
@@ -1640,56 +1592,6 @@ function SpecRow({ label, value }: { label: string; value: string }) {
     </div>
   );
 }
-
-interface ProjectCardProps { project: Project; onClick?: () => void; }
-
-const ProjectCard: React.FC<ProjectCardProps> = ({ project, onClick }) => (
-  <motion.div
-    variants={{ hidden: { opacity: 0, y: 30, filter: "blur(10px)" }, visible: { opacity: 1, y: 0, filter: "blur(0px)", transition: { duration: 1, ease: [0.16, 1, 0.3, 1] } } }}
-    whileHover={{ scale: 1.02, y: -8, boxShadow: "0 20px 40px rgba(0,0,0,0.4), 0 0 20px rgba(255,255,255,0.05)", borderColor: "rgba(255,255,255,0.2)" }}
-    onClick={onClick}
-    className="group flex flex-col border border-white/5 bg-white/[0.03] backdrop-blur-sm transition-all duration-500 rounded-sm cursor-pointer overflow-hidden"
-  >
-    <div className="relative aspect-[16/10] overflow-hidden border-b border-white/5">
-      <img
-        src={project.imageUrl} alt={`${project.title} homepage`} loading="lazy"
-        className="w-full h-full object-cover object-top transition-transform duration-700 group-hover:scale-105"
-      />
-      <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
-      <span className="absolute top-3 left-3 text-[9px] uppercase tracking-[0.2em] font-mono px-2 py-1 bg-black/60 backdrop-blur-sm border border-white/10 text-white/70">
-        {project.category}
-      </span>
-    </div>
-    <div className="flex flex-col gap-5 p-7 flex-1">
-      <div className="flex justify-between items-start">
-        <div className="text-[10px] font-mono text-white/20 tracking-widest">{project.id}</div>
-        <div className="text-white/30 group-hover:text-white transition-colors duration-500">{project.icon}</div>
-      </div>
-      <div className="flex flex-col gap-2">
-        <h3 className="font-display text-xl uppercase tracking-widest font-medium text-white/90 group-hover:text-white transition-colors">{project.title}</h3>
-        <p className="text-[12px] leading-relaxed text-white/50 group-hover:text-white/70 transition-colors font-light tracking-wide">{project.description}</p>
-      </div>
-      <ul className="flex flex-col gap-2">
-        {project.features.slice(0, 4).map((f) => (
-          <li key={f} className="flex items-start gap-2.5 text-[11px] leading-snug text-white/45 font-light">
-            <Check size={11} className="mt-0.5 shrink-0 text-orange-400/70" />
-            {f}
-          </li>
-        ))}
-      </ul>
-      <div className="mt-auto pt-4 border-t border-white/5 flex items-center justify-between gap-3">
-        <a
-          href={project.url} target="_blank" rel="noopener noreferrer"
-          onClick={(e) => e.stopPropagation()}
-          className="flex items-center gap-1.5 text-[10px] uppercase tracking-[0.15em] font-mono text-orange-400/80 hover:text-orange-300 transition-colors truncate"
-        >
-          {project.domain} <ExternalLink size={11} className="shrink-0" />
-        </a>
-        <span className="shrink-0 text-[9px] uppercase tracking-[0.2em] font-mono text-white/30 group-hover:text-white/60 transition-colors">Details →</span>
-      </div>
-    </div>
-  </motion.div>
-);
 
 function ProjectModal({ project, onClose }: { project: Project; onClose: () => void }) {
   return (
